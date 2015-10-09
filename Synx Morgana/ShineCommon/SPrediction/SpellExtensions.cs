@@ -305,11 +305,11 @@ namespace SPrediction
 
                     switch (s.Type)
                     {
-                        case SkillshotType.SkillshotLine:   result = LinePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, s.From.To2D(), s.RangeCheckFrom.To2D());
+                        case SkillshotType.SkillshotLine: result = LinePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, s.From.To2D(), s.RangeCheckFrom.To2D());
                             break;
                         case SkillshotType.SkillshotCircle: result = CirclePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, s.From.To2D(), s.RangeCheckFrom.To2D());
                             break;
-                        case SkillshotType.SkillshotCone:   result = ConePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, s.From.To2D(), s.RangeCheckFrom.To2D());
+                        case SkillshotType.SkillshotCone: result = ConePrediction.GetPrediction(t, s.Width, s.Delay, s.Speed, s.Range, s.Collision, waypoints, avgt, movt, avgp, s.From.To2D(), s.RangeCheckFrom.To2D());
                             break;
                         default:
                             throw new InvalidOperationException("Unknown spell type");
@@ -559,7 +559,7 @@ namespace SPrediction
             if (s.Collision)
                 throw new InvalidOperationException("Collisionable spell");
 
-            Prediction.AoeResult result = ArcPrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.To2D(), s.RangeCheckFrom.To2D());            
+            Prediction.AoeResult result = ArcPrediction.GetAoePrediction(s.Width, s.Delay, s.Speed, s.Range, s.From.To2D(), s.RangeCheckFrom.To2D());
 
             Prediction.lastDrawTick = Utils.TickCount;
             Prediction.lastDrawPos = result.CastPosition;

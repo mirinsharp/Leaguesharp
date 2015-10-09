@@ -37,13 +37,13 @@ namespace SPrediction
         /// </summary>
         /// <param name="input">Neccesary inputs for prediction calculations</param>
         /// <returns>Prediction result as <see cref="Prediction.Result"/></returns>
-        public static Prediction.Result GetArcPrediction(Prediction.Input input)
+        public static Prediction.Result GetPrediction(Prediction.Input input)
         {
             return GetPrediction(input.Target, input.SpellWidth, input.SpellDelay, input.SpellMissileSpeed, input.SpellRange, input.SpellCollisionable, input.Path, input.AvgReactionTime, input.LastMovChangeTime, input.AvgPathLenght, input.From.To2D(), input.RangeCheckFrom.To2D());
         }
 
         /// <summary>
-        /// Gets Prediction result for Arc
+        /// Gets Prediction result
         /// </summary>
         /// <param name="target">Target for spell</param>
         /// <param name="width">Spell width</param>
@@ -82,15 +82,15 @@ namespace SPrediction
 
             Prediction.Result result = Prediction.GetPrediction(target, width, delay, missileSpeed, range, collisionable, SkillshotType.SkillshotCircle, path, avgt, movt, avgp, from, rangeCheckFrom);
 
-            if (result.HitChance >= HitChance.Low && result.HitChance < HitChance.Dashing)
+            if (result.HitChance >= HitChance.Low && result.HitChance < HitChance.VeryHigh)
             {
-                if (result.CastPosition.Distance(from) < 875.0f + width / 2f)
+                if (result.CastPosition.Distance(from) < 875.0f)
                 {
-                    Vector2 direction = (from - result.CastPosition).Normalized();
+                    Vector2 direction = (result.CastPosition - from).Normalized();
 
                     result.CastPosition = from + direction * (875f + width / 2f);
 
-                    var targetHitBox = ClipperWrapper.DefineCircle(result.UnitPosition, target.BoundingRadius);
+                    var targetHitBox = ClipperWrapper.DefineCircle(Prediction.GetFastUnitPosition(target, delay, missileSpeed, from), target.BoundingRadius);
 
                     float multp = (result.CastPosition.Distance(from) / 875.0f);
 

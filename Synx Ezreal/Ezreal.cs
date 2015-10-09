@@ -14,7 +14,6 @@ namespace SynxEzreal
     public class Ezreal : BaseChamp
     {
         private bool IsCheckingJungleKSInDelayAct = false;
-        private float LastDrakeHealth = 0, LastBaronHealth = 0;
         public Ezreal()
             : base ("Ezreal")
         {
@@ -136,16 +135,10 @@ namespace SynxEzreal
                         if (!IsCheckingJungleKSInDelayAct)
                         {
                             IsCheckingJungleKSInDelayAct = true;
-                            /*if (mob.Name.Contains("SRU_Dragon"))
-                                LastDrakeHealth = mob.Health;
-
-                            if (mob.Name.Contains("SRU_Baron"))
-                                LastBaronHealth = mob.Health;*/
                             float lastMobHealth = mob.Health;
                             LeagueSharp.Common.Utility.DelayAction.Add(1000,
                                 () =>
                                 {
-                                    //float lastMobHealth = mob.Name.Contains("SRU_Dragon") ? LastDrakeHealth : LastBaronHealth;
                                     float dmgPerMiliSec = (lastMobHealth - mob.Health) / 1000;
                                     float arriveTime = SPrediction.Prediction.GetArrivalTime(mob.Distance(ObjectManager.Player.ServerPosition), Spells[R].Delay, Spells[R].Speed) * 1000;
                                     float leftHealth = mob.Health - dmgPerMiliSec * arriveTime;

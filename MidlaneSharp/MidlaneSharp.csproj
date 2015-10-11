@@ -28,10 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -58,19 +58,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>..\LeagueSharp222\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>..\LeagueSharp222\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\LeagueSharp222\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\LeagueSharp222\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\LeagueSharp222\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -106,6 +106,7 @@
     <Compile Include="SPrediction\Obj_AI_HeroExtensions.cs" />
     <Compile Include="SPrediction\PathTracker.cs" />
     <Compile Include="SPrediction\Prediction.cs" />
+    <Compile Include="SPrediction\RingPrediction.cs" />
     <Compile Include="SPrediction\SpellExtensions.cs" />
     <Compile Include="SPrediction\Utility.cs" />
     <Compile Include="SPrediction\VectorPrediction.cs" />

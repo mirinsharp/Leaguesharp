@@ -271,10 +271,11 @@ namespace ShineCommon
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double CalculateSpellDamage(Obj_AI_Hero target)
+        public virtual double CalculateSpellDamage(Obj_AI_Hero target)
         {
             return CalculateDamageQ(target) + CalculateDamageW(target) + CalculateDamageE(target) + CalculateDamageR(target);
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private double CalculateSummonersDamage(Obj_AI_Hero target)

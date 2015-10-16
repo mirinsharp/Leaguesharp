@@ -17,7 +17,7 @@ namespace ShyRiven
         {
             if (s_Target != null)
             {
-                if (!s_Target.IsValidTarget() || s_Target.IsDead)
+                if (!s_Target.IsValidTarget() || s_Target.IsDead || !s_Target.IsTargetable)
                     s_Target = null;
                 else if (s_Target.Distance(ObjectManager.Player.ServerPosition) > inRange)
                 {

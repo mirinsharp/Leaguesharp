@@ -164,7 +164,7 @@ namespace ShyRiven
                         return;
                     }
 
-                    t = Target.Get(1300, true);
+                    t = Target.Get(1400, true);
                     if (t != null)
                     {
                         if (Me.Spells[E].IsReady() && !ObjectManager.Player.HasBuff("RivenFengShuiEngine"))
@@ -177,17 +177,27 @@ namespace ShyRiven
 
                         if (Me.Spells[W].IsReady() && t.IsValidTarget(Me.Spells[W].Range))
                         {
+                            Me.CastCrescent();
                             Me.Spells[W].Cast();
                             ObjectManager.Player.IssueOrder(GameObjectOrder.AttackTo, t);
-                            Me.CastCrescent();
                         }
 
-                        if (ObjectManager.Player.HasBuff("RivenFengShuiEngine") && !Me.Config.Item("CDISABLER").GetValue<bool>())
+                        if (ObjectManager.Player.HasBuff("RivenFengShuiEngine"))
                         {
-                            if (Me.Spells[R].IsReady()) //r2
-                                Me.Spells[R].Cast(t.ServerPosition);
-                            Me.FastQCombo();
+                            for (int i = 0; i < GapCloseMethods.Length; i++)
+                                GapCloseMethods[i](t);
+
                             ShineCommon.Orbwalking.Move2 = false;
+                            if ((t.Health - Me.CalculateDamageR2(t) <= 0) && !Me.Config.Item("CDISABLER").GetValue<bool>())
+                            {
+                                if (Me.Spells[R].IsReady()) //r2
+                                    Me.Spells[R].Cast(t.ServerPosition);
+                            }
+                            else
+                            {
+                                if (!Me.Spells[W].IsReady())
+                                    Me.FastQCombo();
+                            }
                         }
                     }
                 };

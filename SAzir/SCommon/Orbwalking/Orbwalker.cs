@@ -443,10 +443,7 @@ namespace SCommon.Orbwalking
                 if (ObjectManager.Player.AttackRange <= m_Configuration.StickRange)
                 {
                     if (!CanOrbwalkTarget(target) && target.IsValidTarget(m_Configuration.StickRange))
-                    {
                         OrbwalkingPoint = target.Position;
-                        Game.PrintChat("sticked");
-                    }
                     else
                         OrbwalkingPoint = Vector3.Zero;
                 }
@@ -515,7 +512,7 @@ namespace SCommon.Orbwalking
 
         private int GetTowerMinion()
         {
-            if(CanOrbwalkTarget(m_towerTarget))
+            if (CanOrbwalkTarget(m_towerTarget))
             {
                 var attack = Damage.Prediction.ContainsTowerAttack(m_towerTarget as Obj_AI_Base);
                 if (attack == null)
@@ -532,7 +529,7 @@ namespace SCommon.Orbwalking
                     return -1;
 
                 float t = (GetWindupTime() + attack.Target.Distance(ObjectManager.Player.ServerPosition) / Utility.GetProjectileSpeed() - 0.07f) * 1000f;
-                if( attack.Delay + attack.Target.Distance(attack.Source.ServerPosition) / attack.ProjectileSpeed * 1000f > t)
+                if (attack.Delay + attack.Target.Distance(attack.Source.ServerPosition) / attack.ProjectileSpeed * 1000f > t)
                 {
                     pred = HealthPrediction.GetHealthPrediction(attack.Target, (int)(attack.Delay + attack.Target.Distance(attack.Source.ServerPosition) / attack.ProjectileSpeed * 1000f), 0);
                     health = pred - attack.Damage;
@@ -564,7 +561,7 @@ namespace SCommon.Orbwalking
                 return m_fnShouldWait();
 
             if (m_towerTarget != null && m_towerTarget.IsValidTarget() && CanOrbwalkTarget(m_towerTarget) && GetTowerMinion() != -1)
-                    return true;
+                return true;
             return
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Any(
@@ -580,7 +577,7 @@ namespace SCommon.Orbwalking
             bool wait = ShouldWait();
             if (ActiveMode == Mode.LaneClear || ActiveMode == Mode.LastHit || ActiveMode == Mode.Mixed)
             {
-                if(m_towerTarget != null && m_towerTarget.IsValidTarget() && CanOrbwalkTarget(m_towerTarget, ObjectManager.Player.AttackRange + 150f))
+                if (m_towerTarget != null && m_towerTarget.IsValidTarget() && CanOrbwalkTarget(m_towerTarget, ObjectManager.Player.AttackRange + 150f))
                 {
                     int x = GetTowerMinion();
                     if (x == -1)
@@ -631,7 +628,7 @@ namespace SCommon.Orbwalking
                 {
                     float range = -1;
                     range = (ObjectManager.Player.IsMelee && m_Configuration.MagnetMelee && m_Configuration.StickRange > ObjectManager.Player.AttackRange) ? m_Configuration.StickRange : -1;
-                    if(ObjectManager.Player.CharData.BaseSkinName == "Azir")
+                    if (ObjectManager.Player.CharData.BaseSkinName == "Azir")
                         range = 950f;
                     var target = LeagueSharp.Common.TargetSelector.GetTarget(range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
                     if (target.IsValidTarget() && (Utility.InAARange(target) || (ActiveMode != Mode.LaneClear && ObjectManager.Player.IsMelee && m_Configuration.MagnetMelee && target.IsValidTarget(m_Configuration.StickRange))))
@@ -664,7 +661,7 @@ namespace SCommon.Orbwalking
 
             var t = GetTarget();
             m_lastTarget = t;
-            
+
             if (ObjectManager.Player.IsMelee && m_Configuration.MagnetMelee && t is Obj_AI_Hero)
                 Magnet(t);
             else

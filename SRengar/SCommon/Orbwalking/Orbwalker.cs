@@ -443,10 +443,7 @@ namespace SCommon.Orbwalking
                 if (ObjectManager.Player.AttackRange <= m_Configuration.StickRange)
                 {
                     if (!CanOrbwalkTarget(target) && target.IsValidTarget(m_Configuration.StickRange))
-                    {
                         OrbwalkingPoint = target.Position;
-                        Game.PrintChat("sticked");
-                    }
                     else
                         OrbwalkingPoint = Vector3.Zero;
                 }

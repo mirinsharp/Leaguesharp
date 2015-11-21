@@ -40,7 +40,7 @@ namespace SAutoCarry.Champions
         
         public void BeforeOrbwalk()
         {
-            if (HaveFullFerocity && ObjectManager.Player.HealthPercent < AutoHealPercent && Spells[W].IsReady())
+            if (HaveFullFerocity && ObjectManager.Player.HealthPercent <= AutoHealPercent && Spells[W].IsReady())
                 Spells[W].Cast();
         }
 
@@ -79,14 +79,21 @@ namespace SAutoCarry.Champions
             if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && args.Target is Obj_AI_Hero && ComboUseQ)
             {
                 leapTarget = args.Target as Obj_AI_Hero;
-                if (WillLeap)
+                if (Spells[Q].IsReady())
                 {
-                    if (OneShotComboActive && Spells[Q].IsReady())
-                        Spells[Q].Cast();
-                }
+                    float dmg = 0f;
+                    if (HaveFullFerocity)
+                        dmg = (float)ObjectManager.Player.CalcDamage(leapTarget, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 45, 60, 75, 90, 105, 120, 135, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240 }[ObjectManager.Player.Level - 1] + (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod) * 0.5f);
+                    else
+                        dmg = (float)ObjectManager.Player.CalcDamage(leapTarget, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 60, 90, 120, 150 }[ObjectManager.Player.GetSpell(SpellSlot.Q).Level - 1] + (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod) * new int[] { 0, 5, 10, 15, 20 }[ObjectManager.Player.GetSpell(SpellSlot.Q).Level - 1] / 100f);
 
-                if (Spells[Q].IsReady() && CalculateDamageQ(leapTarget) >= leapTarget.Health)
-                    Spells[Q].Cast();
+                    if (dmg >= leapTarget.Health || (WillLeap && OneShotComboActive))
+                    {
+                        Spells[Q].Cast();
+                        if (!WillLeap)
+                            args.Process = false;
+                    }
+                }
             }
         }
 

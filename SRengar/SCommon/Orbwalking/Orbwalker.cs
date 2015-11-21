@@ -215,7 +215,7 @@ namespace SCommon.Orbwalking
             if (m_attackReset)
                 return true;
 
-            return Utils.TickCount + t + Game.Ping / 2 - m_lastAATick - m_Configuration.ExtraWindup /*+ ((ObjectManager.Player.HasBuff("rengarq") || ObjectManager.Player.HasBuff("rengarqemp")) ? 200 : 0) */- (m_Configuration.LegitMode && !ObjectManager.Player.IsMelee ? Math.Max(100, ObjectManager.Player.AttackDelay * 1000) : 0) * m_Configuration.LegitPercent / 100f >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
+            return Utils.TickCount + t + Game.Ping / 2 - m_lastAATick - m_Configuration.ExtraWindup - (m_Configuration.LegitMode && !ObjectManager.Player.IsMelee ? Math.Max(100, ObjectManager.Player.AttackDelay * 1000) : 0) * m_Configuration.LegitPercent / 100f >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
         }
 
         /// <summary>
@@ -405,11 +405,9 @@ namespace SCommon.Orbwalking
                     Vector3 playerPos = ObjectManager.Player.ServerPosition;
                     if (playerPos.Distance(pos, true) < m_Configuration.HoldAreaRadius * m_Configuration.HoldAreaRadius)
                     {
-                        if (ObjectManager.Player.Path.Length > 0 && (Utils.TickCount + Game.Ping / 2 - m_lastAATick) * 0.6f >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseWindUp))
-                        {
-                            ObjectManager.Player.IssueOrder(GameObjectOrder.Stop, playerPos);
-                            m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 70);
-                        }
+                        ObjectManager.Player.IssueOrder(GameObjectOrder.Stop, playerPos);
+                        m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 70);
+                        return;
                     }
 
                     if (ObjectManager.Player.Distance(pos, true) < 22500)
@@ -443,7 +441,10 @@ namespace SCommon.Orbwalking
                 if (ObjectManager.Player.AttackRange <= m_Configuration.StickRange)
                 {
                     if (!CanOrbwalkTarget(target) && target.IsValidTarget(m_Configuration.StickRange))
+                    {
                         OrbwalkingPoint = target.Position;
+                        Game.PrintChat("sticked");
+                    }
                     else
                         OrbwalkingPoint = Vector3.Zero;
                 }
@@ -656,8 +657,8 @@ namespace SCommon.Orbwalking
             if (Utils.TickCount - m_lastAttackTick < 70 + Math.Min(60, Game.Ping))
                 return;
 
-            if (CanMove())
-                m_attackInProgress = false;
+            if (CanMove() && m_attackInProgress)
+                LeagueSharp.Common.Utility.DelayAction.Add(Game.Ping, () => m_attackInProgress = false);
 
             var t = GetTarget();
             m_lastTarget = t;
@@ -762,7 +763,7 @@ namespace SCommon.Orbwalking
             if (sender.IsMe)
             {
                 string buffname = args.Buff.Name.ToLower();
-                if (buffname == "swainmetamorphism" || buffname == "gnartransform")
+                if (buffname == "swainmetamorphism" || buffname == "gnartransform" || buffname == "rengarqbase" || buffname == "rengarqemp")
                     ResetOrbwalkValues();
             }
         }
@@ -772,7 +773,7 @@ namespace SCommon.Orbwalking
             if (sender.IsMe)
             {
                 string buffname = args.Buff.Name.ToLower();
-                if (buffname == "jaycestancegun" || buffname == "jaycestancehammer" || buffname == "swainmetamorphism" || buffname == "gnartransform")
+                if (buffname == "jaycestancegun" || buffname == "jaycestancehammer" || buffname == "swainmetamorphism" || buffname == "gnartransform" || buffname == "rengarqbase" || buffname == "rengarqemp")
                     ResetOrbwalkValues();
             }
         }

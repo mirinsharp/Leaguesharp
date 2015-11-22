@@ -525,7 +525,8 @@ namespace SCommon.Damage
             {
                 if (hero.ChampionName == "Azir" && ObjectManager.Get<GameObject>().Count(p => p.IsAlly && p.Name == "AzirSoldier" && p.Position.Distance(target.Position) < 315) > 0)
                     dmg = (float)ObjectManager.Player.GetSpellDamage(target, SpellSlot.W);
-                dmg += AAEnpowers[ObjectManager.Player.GetID()].Where(p => p.IsActive(hero, target)).Sum(passive => passive.GetDamage(hero, target));
+                if (AAEnpowers[ObjectManager.Player.GetID()] != null)
+                    dmg += AAEnpowers[ObjectManager.Player.GetID()].Where(p => p.IsActive(hero, target)).Sum(passive => passive.GetDamage(hero, target));
                 dmg += ItemPassives.Where(p => Items.HasItem(p.ItemID)).Sum(passive => passive.GetDamage(hero, target));
             }
 

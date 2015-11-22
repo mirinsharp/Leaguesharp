@@ -11,6 +11,7 @@ using SharpDX.Direct3D9;
 using Prediction = SCommon.Prediction.Prediction;
 using Geometry = SCommon.Maths.Geometry;
 using Color = System.Drawing.Color;
+using TargetSelector = SCommon.TS.TargetSelector;
 
 namespace SCommon.PluginBase
 {
@@ -39,6 +40,7 @@ namespace SCommon.PluginBase
 
             ConfigMenu = new Menu(szMenuName, szChampName, true);
 
+            TargetSelector.Initialize(ConfigMenu);
             Orbwalker = new Orbwalking.Orbwalker(ConfigMenu);
 
             SetSpells();

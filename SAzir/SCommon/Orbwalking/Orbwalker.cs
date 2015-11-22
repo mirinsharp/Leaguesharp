@@ -329,6 +329,17 @@ namespace SCommon.Orbwalking
                         BeforeAttackArgs args = Events.FireBeforeAttack(this, target);
                         if (args.Process)
                             Attack(target);
+                        else
+                        {
+                            if(CanMove() && ObjectManager.Player.GetAttackSpeed() < 2.51f)
+                            {
+                                if (m_Configuration.DontMoveInRange && target.Type == GameObjectType.obj_AI_Hero)
+                                    return;
+
+                                if ((m_Configuration.LegitMode && !ObjectManager.Player.IsMelee) || !m_Configuration.LegitMode)
+                                    Move(point);
+                            }
+                        }
                     }
                     else if (CanMove() && ObjectManager.Player.GetAttackSpeed() < 2.51f)
                     {
@@ -569,7 +580,7 @@ namespace SCommon.Orbwalking
                         minion =>
                             (minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral &&
                             Utility.InAARange(minion) && MinionManager.IsMinion(minion, false) &&
-                            Damage.Prediction.AggroCount(minion) > 0 && (minion.Health - Damage.Prediction.GetPrediction(minion, ObjectManager.Player.AttackDelay * 1000f * 2f) < Damage.AutoAttack.GetDamage(minion))));
+                             (minion.Health - Damage.Prediction.GetPrediction(minion, ObjectManager.Player.AttackDelay * 1000f * 2f, true) <= Damage.AutoAttack.GetDamage(minion, true) * (int)(Math.Ceiling(Damage.Prediction.AggroCount(minion) / 2f)))));
         }
 
 

@@ -60,7 +60,7 @@ namespace SCommon.Damage
         /// <param name="unit">Unit</param>
         /// <param name="t">t in ms</param>
         /// <returns></returns>
-        public static float GetPrediction(Obj_AI_Base unit, float t)
+        public static float GetPrediction(Obj_AI_Base unit, float t, bool checkSeq = false)
         {
             float dmg = 0.0f;
             foreach (var attack in ActiveAttacks.Values)
@@ -76,6 +76,19 @@ namespace SCommon.Damage
                             float arriveTime = (attack.StartTick + attack.Delay + maxTravelTime) - Utils.TickCount + (attack.Source.Type == GameObjectType.obj_AI_Turret ? 200 : 0);
                             if (arriveTime <= t && arriveTime > 0) //if minion's missile arrives earlier than me
                                 dmg += attack.Damage; //add minion's dmg
+                            if (checkSeq)
+                            {
+                                int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
+                                for (int i = 0; i < seqAttacks; i++)
+                                {
+                                    arriveTime = attack.Delay + maxTravelTime;
+                                    if (arriveTime <= t)
+                                    {
+                                        dmg += attack.Damage;
+                                        t -= arriveTime;
+                                    }
+                                }
+                            }
                         }
                         else
                         {
@@ -85,6 +98,20 @@ namespace SCommon.Damage
                                 float arriveTime = attack.AnimationTime - elapsedTick + attack.Delay + maxTravelTime + Game.Ping / 2f;
                                 if (arriveTime <= t && attack.AnimationTime - elapsedTick > 0)
                                     dmg += attack.Damage;
+
+                                if (checkSeq)
+                                {
+                                    int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
+                                    for (int i = 0; i < seqAttacks; i++)
+                                    {
+                                        arriveTime = attack.Delay + maxTravelTime;
+                                        if (arriveTime <= t)
+                                        {
+                                            dmg += attack.Damage;
+                                            t -= arriveTime;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

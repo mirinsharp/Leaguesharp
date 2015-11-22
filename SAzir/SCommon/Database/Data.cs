@@ -22,7 +22,7 @@ namespace SCommon.Database
 
         public static float GetOrginalHitBox(this Obj_AI_Hero hero)
         {
-            return s_HeroHitBoxes[hero.Name];
+            return s_HeroHitBoxes[hero.ChampionName];
         }
 
         public static int GetJunglePriority(this Obj_AI_Base mob)
@@ -39,17 +39,17 @@ namespace SCommon.Database
 
         public static int GetPriority(this Obj_AI_Hero hero)
         {
-            return (int)s_ChampionData.Find(p => p.Name == hero.Name).Role;
+            return (int)s_ChampionData.Find(p => p.Name == hero.ChampionName).Role;
         }
 
         public static ChampionRole GetRole(this Obj_AI_Hero hero)
         {
-            return s_ChampionData.Find(p => p.Name == hero.Name).Role;
+            return s_ChampionData.Find(p => p.Name == hero.ChampionName).Role;
         }
 
         public static int GetID(this Obj_AI_Hero hero)
         {
-            return s_ChampionData.Find(p => p.Name == hero.Name).ID;
+            return s_ChampionData.Find(p => p.Name == hero.ChampionName).ID;
         }
 
         public static int GetID(string name)
@@ -68,8 +68,8 @@ namespace SCommon.Database
                 return;
             s_HeroHitBoxes = new Dictionary<string, float>();
             foreach (var hero in HeroManager.AllHeroes)
-                if (!s_HeroHitBoxes.ContainsKey(hero.Name))
-                    s_HeroHitBoxes.Add(hero.Name, hero.BBox.Minimum.Distance(hero.BBox.Maximum));
+                if (!s_HeroHitBoxes.ContainsKey(hero.ChampionName))
+                    s_HeroHitBoxes.Add(hero.ChampionName, hero.BBox.Minimum.Distance(hero.BBox.Maximum));
         }
 
         private static void GenerateJungleData()

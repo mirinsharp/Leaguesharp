@@ -11,10 +11,11 @@ using SharpDX.Direct3D9;
 using Prediction = SCommon.Prediction.Prediction;
 using Geometry = SCommon.Maths.Geometry;
 using Color = System.Drawing.Color;
+using TargetSelector = SCommon.TS.TargetSelector;
 
 namespace SCommon.PluginBase
 {
-    public  class Champion : IChampion
+    public abstract class Champion : IChampion
     {
         public const int Q = 0, W = 1, E = 2, R = 3;
 
@@ -39,6 +40,7 @@ namespace SCommon.PluginBase
 
             ConfigMenu = new Menu(szMenuName, szChampName, true);
 
+            TargetSelector.Initialize(ConfigMenu);
             Orbwalker = new Orbwalking.Orbwalker(ConfigMenu);
 
             SetSpells();

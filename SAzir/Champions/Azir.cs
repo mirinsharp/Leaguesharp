@@ -34,8 +34,13 @@ namespace SAutoCarry.Champions
         public override void CreateConfigMenu()
         {
             Menu combo = new Menu("Combo", "SAutoCarry.Azir.Combo");
-            combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseQ", "Use Q").SetValue(true)).ValueChanged += (s, ar) => combo.Item("SAutoCarry.Azir.Combo.UseQOnlyOutOfAA").Show(ar.GetNewValue<bool>());
+            combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseQ", "Use Q").SetValue(true)).ValueChanged += (s, ar) =>
+            {
+                combo.Item("SAutoCarry.Azir.Combo.UseQOnlyOutOfAA").Show(ar.GetNewValue<bool>());
+                combo.Item("SAutoCarry.Azir.Combo.UseQAlwaysMaxRange").Show(ar.GetNewValue<bool>());
+            };
             combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseQOnlyOutOfAA", "Use Q Only When Enemy out of range").SetValue(true)).Show(combo.Item("SAutoCarry.Azir.Combo.UseQ").GetValue<bool>());
+            combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseQAlwaysMaxRange", "Always Cast Q To Max Range").SetValue(false)).Show(combo.Item("SAutoCarry.Azir.Combo.UseQ").GetValue<bool>());
             combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseE", "Use E If target is killable").SetValue(true));
             combo.AddItem(new MenuItem("SAutoCarry.Azir.Combo.UseR", "Use R").SetValue(true));
@@ -100,8 +105,15 @@ namespace SAutoCarry.Champions
                         if (ObjectManager.Player.ServerPosition.Distance(t.ServerPosition) < Spells[Q].Range)
                         {
                             Spells[Q].UpdateSourcePosition(soldier.Position, ObjectManager.Player.ServerPosition);
-                            if (Spells[Q].SPredictionCast(t, HitChance.High))
+                            var predRes = Spells[Q].GetSPrediction(t);
+                            if (predRes.HitChance >= HitChance.High)
+                            {
+                                var pos = predRes.CastPosition;
+                                if (ComboUseQAlwaysMaxRange)
+                                    pos = ObjectManager.Player.ServerPosition.To2D().Extend(pos, Spells[Q].Range);
+                                Spells[Q].Cast(pos);
                                 return;
+                            }
                         }
                     }
                 }
@@ -396,6 +408,9 @@ namespace SAutoCarry.Champions
         {
             if (sender.IsMe)
             {
+                if (args.SData.Name == "azirq")
+                    Orbwalker.ResetAATimer();
+
                 if (JumpActive || InsecActive)
                 {
                     if (args.SData.Name == "azire" && Utils.TickCount - CastQT < 500)
@@ -421,6 +436,11 @@ namespace SAutoCarry.Champions
         public bool ComboUseQOnlyOutOfRange
         {
             get { return ConfigMenu.Item("SAutoCarry.Azir.Combo.UseQOnlyOutOfAA").GetValue<bool>(); }
+        }
+
+        public bool ComboUseQAlwaysMaxRange
+        {
+            get { return ConfigMenu.Item("SAutoCarry.Azir.Combo.UseQAlwaysMaxRange").GetValue<bool>(); }
         }
 
         public bool ComboUseW

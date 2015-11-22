@@ -26,7 +26,7 @@ namespace SAutoCarry.Champions.Helpers
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.Draw", "Draw").SetValue(true));
             Menu whitelist = new Menu("Whitelist", "SAutoCarry.Helpers.Condemn.WhiteList");
             foreach(var enemy in HeroManager.Enemies)
-                whitelist.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.WhiteList" + enemy.ChampionName, "Condemn " + enemy.Name).SetValue(true));
+                whitelist.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.WhiteList" + enemy.ChampionName, "Condemn " + enemy.ChampionName).SetValue(true));
             condemn.AddSubMenu(whitelist);
             s_Champion.ConfigMenu.AddSubMenu(condemn);
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;

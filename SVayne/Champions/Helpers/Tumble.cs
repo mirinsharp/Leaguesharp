@@ -22,6 +22,7 @@ namespace SAutoCarry.Champions.Helpers
             tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.Wall", "Always Tumble to wall if possible").SetValue(false));
             tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.Only2W", "Tumble only when enemy has 2 w stacks").SetValue(false));
             tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.Only2WHarass", "Tumble only when enemy has 2 w stacks in harass mode").SetValue(true));
+            tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.DontQIntoEnemy", "Dont Q Into Enemies").SetValue(false));
             tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.DontSafeCheck", "Dont check tumble position is safe").SetValue(false));
             tumble.AddItem(new MenuItem("SAutoCarry.Helpers.Tumble.Root.WallTumble", "Wall Tumble").SetValue(new KeyBind('Y', KeyBindType.Press)));
             s_Champion.ConfigMenu.AddSubMenu(tumble);
@@ -81,7 +82,10 @@ namespace SAutoCarry.Champions.Helpers
             if (DontSafeCheck)
                 return vec;
 
-            if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.BasicAttack.CastRange) || vec.UnderTurret(true))
+            if (DontQIntoEnemies && HeroManager.Enemies.Any(p => p.ServerPosition.To2D().Distance(vec) <= p.AttackRange + ObjectManager.Player.BoundingRadius + (p.IsMelee ? 100 : 0)) || vec.UnderTurret(true))
+                return Vector3.Zero;
+
+            if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.AttackRange + (p.IsMelee ? 50 : 0)) || vec.UnderTurret(true))
                 return Vector3.Zero;
 
             return vec;
@@ -172,6 +176,11 @@ namespace SAutoCarry.Champions.Helpers
         public static bool Only2WHarass
         {
             get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Tumble.Root.Only2WHarass").GetValue<bool>(); }
+        }
+
+        public static bool DontQIntoEnemies
+        {
+            get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Tumble.Root.DontQIntoEnemy").GetValue<bool>(); }
         }
 
         public static bool DontSafeCheck

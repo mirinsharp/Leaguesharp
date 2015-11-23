@@ -13,7 +13,7 @@ namespace SAutoCarry.Champions
     public class Vayne : Champion
     {
         public Vayne()
-            : base ("Vayne", "SAutoCarry - Vayne")
+            : base("Vayne", "SAutoCarry - Vayne")
         {
             Tumble.Initialize(this);
             Condemn.Initialize(this);
@@ -36,7 +36,9 @@ namespace SAutoCarry.Champions
 
             Menu misc = new Menu("Misc", "SAutoCarry.Vayne.Misc");
             misc.AddItem(new MenuItem("SAutoCarry.Vayne.Misc.AAIndicator", "Draw AA Indicator").SetValue(true));
-            misc.AddItem(new MenuItem("SAutoCarry.Vayne.Misc.DontAAInvisible", "Dont AA While Stealth").SetValue(true));
+            misc.AddItem(new MenuItem("SAutoCarry.Vayne.Misc.DontAAInvisible", "Dont AA While Stealth").SetValue(true)).ValueChanged += (s, ar) => misc.Item("SAutoCarry.Vayne.Misc.DontAAInvisibleCount").Show(ar.GetNewValue<bool>());
+            misc.AddItem(new MenuItem("SAutoCarry.Vayne.Misc.DontAAInvisibleCount", "Dont AA While Stealth if around enemy count >").SetValue(new Slider(1, 0, 5))).Show(misc.Item("SAutoCarry.Vayne.Misc.DontAAInvisible").GetValue<bool>());
+            misc.AddItem(new MenuItem("SAutoCarry.Vayne.Misc.LaneClearQ", "Use Q LaneClear").SetValue(true));
 
             ConfigMenu.AddSubMenu(combo);
             ConfigMenu.AddSubMenu(harass);
@@ -63,10 +65,10 @@ namespace SAutoCarry.Champions
                     Spells[E].CastOnUnit(t);
             }
         }
-        
+
         public void Harass()
         {
-            if(HarassUseE)
+            if (HarassUseE)
             {
                 var t = TargetSelector.GetTarget(Spells[E].Range + 300, LeagueSharp.Common.TargetSelector.DamageType.Physical);
                 if (t != null && Spells[E].IsReady())
@@ -82,11 +84,11 @@ namespace SAutoCarry.Champions
 
         public void BeforeDraw()
         {
-            if(DrawAAIndicator)
+            if (DrawAAIndicator)
             {
-                foreach(var enemy in HeroManager.Enemies)
+                foreach (var enemy in HeroManager.Enemies)
                 {
-                    if(enemy.IsValidTarget(1200))
+                    if (enemy.IsValidTarget(1200))
                     {
                         float autoAttackDamage = SCommon.Damage.AutoAttack.GetDamage(enemy);
                         int aaCount = (int)Math.Ceiling(Math.Max(1, enemy.Health - Spells[Q].GetDamage(enemy)) / autoAttackDamage);
@@ -106,7 +108,7 @@ namespace SAutoCarry.Champions
                                 }
                             }
                         }
-                        if(neededAA > 1)
+                        if (neededAA > 1)
                             neededAA--;
                         Text.DrawText(null, neededAA.ToString() + " x AA", (int)enemy.HPBarPosition.X, (int)enemy.HPBarPosition.Y, Color.Gold);
                     }
@@ -116,9 +118,9 @@ namespace SAutoCarry.Champions
 
         protected override void Orbwalking_BeforeAttack(SCommon.Orbwalking.BeforeAttackArgs args)
         {
-            if(DontAAStealth && ObjectManager.Player.HasBuff("vaynetumblefade"))
+            if (DontAAStealth && ObjectManager.Player.HasBuff("vaynetumblefade"))
             {
-                if (ObjectManager.Player.ServerPosition.CountEnemiesInRange(1000) > 1)
+                if (ObjectManager.Player.ServerPosition.CountEnemiesInRange(1000) > DontAAStealthCount)
                 {
                     if (args.Target is Obj_AI_Hero && args.Target.Health <= SCommon.Damage.AutoAttack.GetDamage(args.Target as Obj_AI_Base, true) * 2 && ObjectManager.Player.Health > (args.Target as Obj_AI_Hero).GetAutoAttackDamage(ObjectManager.Player, true)) //can killable
                         return;
@@ -140,13 +142,25 @@ namespace SAutoCarry.Champions
                         Spells[Q].Cast(pos);
                 }
             }
-            else if(Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
+            else if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
             {
-                if(Spells[Q].IsReady())
+                if (Spells[Q].IsReady())
                 {
                     var jungleMob = MinionManager.GetMinions(600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
                     if (jungleMob != null)
                         Spells[Q].Cast(Game.CursorPos);
+                    else
+                    {
+                        if(LaneClearQ)
+                        {
+                            var minion = MinionManager.GetMinions(ObjectManager.Player.AttackRange + 100).Where(p => p.Health <= SCommon.Damage.AutoAttack.GetDamage(p) + ObjectManager.Player.GetSpellDamage(p, SpellSlot.Q)).FirstOrDefault();
+                            if(minion != null)
+                            {
+                                Orbwalker.ForcedTarget = minion;
+                                Spells[Q].Cast(Game.CursorPos);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -184,6 +198,16 @@ namespace SAutoCarry.Champions
         public bool DontAAStealth
         {
             get { return ConfigMenu.Item("SAutoCarry.Vayne.Misc.DontAAInvisible").GetValue<bool>(); }
+        }
+
+        public int DontAAStealthCount
+        {
+            get { return ConfigMenu.Item("SAutoCarry.Vayne.Misc.DontAAInvisibleCount").GetValue<Slider>().Value; }
+        }
+
+        public bool LaneClearQ
+        {
+            get { return ConfigMenu.Item("SAutoCarry.Vayne.Misc.LaneClearQ").GetValue<bool>(); }
         }
     }
 }

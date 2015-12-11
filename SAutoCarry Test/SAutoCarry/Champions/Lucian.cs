@@ -195,9 +195,6 @@ namespace SAutoCarry.Champions
 
         protected override void Orbwalking_AfterAttack(SCommon.Orbwalking.AfterAttackArgs args)
         {
-            if (!HasPassive)
-                return;
-
             HasPassive = false;
             if (args.Target != null && args.Target is Obj_AI_Hero && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo)
             {
@@ -212,7 +209,7 @@ namespace SAutoCarry.Champions
                     }
                 }
 
-                if (Spells[W].IsReady())
+                if (Spells[W].IsReady() && ComboUseW)
                     Spells[W].SPredictionCast(t, HitChance.High);
             }
             else if (args.Target != null && args.Target is Obj_AI_Base && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)

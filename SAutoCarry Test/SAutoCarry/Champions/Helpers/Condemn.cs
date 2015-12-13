@@ -22,6 +22,7 @@ namespace SAutoCarry.Champions.Helpers
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.Interrupter", "Use Condemn to Interrupt spells").SetValue(false));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.TumbleCondemn", "Q->E when possible").SetValue(true));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.FlashCondemn", "Condemn->Flash selected target").SetValue(new KeyBind('T', KeyBindType.Press)));
+            condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.DontCondemnTurret", "Dont Condemn Under Turret").SetValue(true));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.PushDistance", "Push Distance").SetValue(new Slider(400, 300, 470)));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.Draw", "Draw").SetValue(true));
             Menu whitelist = new Menu("Whitelist", "SAutoCarry.Helpers.Condemn.WhiteList");
@@ -141,17 +142,20 @@ namespace SAutoCarry.Champions.Helpers
             for (int i = 0; i < pushRange; i += 20)
             {
                 var lastPost = targetPosition + (pushDirection * i);
-                var colFlags = NavMesh.GetCollisionFlags(lastPost.X, lastPost.Y);
-                if (colFlags.HasFlag(CollisionFlags.Wall) || colFlags.HasFlag(CollisionFlags.Building))
+                if (!lastPost.To3D2().UnderTurret(true) || !DontCondemnTurret)
                 {
-                    var sideA = lastPost + pushDirection * 20f + (pushDirection.Perpendicular() * boundingRadius);
-                    var sideB = lastPost + pushDirection * 20f - (pushDirection.Perpendicular() * boundingRadius);
+                    var colFlags = NavMesh.GetCollisionFlags(lastPost.X, lastPost.Y);
+                    if (colFlags.HasFlag(CollisionFlags.Wall) || colFlags.HasFlag(CollisionFlags.Building))
+                    {
+                        var sideA = lastPost + pushDirection * 20f + (pushDirection.Perpendicular() * boundingRadius);
+                        var sideB = lastPost + pushDirection * 20f - (pushDirection.Perpendicular() * boundingRadius);
 
-                    var flagsA = NavMesh.GetCollisionFlags(sideA.X, sideA.Y);
-                    var flagsB = NavMesh.GetCollisionFlags(sideB.X, sideB.Y);
+                        var flagsA = NavMesh.GetCollisionFlags(sideA.X, sideA.Y);
+                        var flagsB = NavMesh.GetCollisionFlags(sideB.X, sideB.Y);
 
-                    if ((flagsA.HasFlag(CollisionFlags.Wall) || flagsA.HasFlag(CollisionFlags.Building)) && (flagsB.HasFlag(CollisionFlags.Wall) || flagsB.HasFlag(CollisionFlags.Building)))
-                        return true;
+                        if ((flagsA.HasFlag(CollisionFlags.Wall) || flagsA.HasFlag(CollisionFlags.Building)) && (flagsB.HasFlag(CollisionFlags.Wall) || flagsB.HasFlag(CollisionFlags.Building)))
+                            return true;
+                    }
                 }
             }
             return false;
@@ -224,6 +228,11 @@ namespace SAutoCarry.Champions.Helpers
         public static bool FlashCondemn
         {
             get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.FlashCondemn").GetValue<KeyBind>().Active; }
+        }
+
+        public static bool DontCondemnTurret
+        {
+            get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.DontCondemnTurret").GetValue<bool>(); }
         }
 
         public static int PushDistance

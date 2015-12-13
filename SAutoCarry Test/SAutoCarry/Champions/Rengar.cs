@@ -130,7 +130,7 @@ namespace SAutoCarry.Champions
                         {
                             if (Spells[E].GetDamage(minion) > minion.Health)
                             {
-                                if (Spells[E].GetCollision(ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { minion.ServerPosition.To2D() }).Count == 0)
+                                if (Spells[E].GetCollision(ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { minion.ServerPosition.To2D() }).Count < 2)
                                     Spells[E].Cast(minion.ServerPosition);
                             }
                         }
@@ -184,7 +184,7 @@ namespace SAutoCarry.Champions
         {
             if (sender.IsMe && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && leapTarget != null)
             {
-                LeagueSharp.Common.Utility.DelayAction.Add(args.Duration - 50, () =>
+                LeagueSharp.Common.Utility.DelayAction.Add(args.Duration - 100, () =>
                 {
                     if (Items.HasItem(3077) && Items.CanUseItem(3077))
                         Items.UseItem(3077);
@@ -201,11 +201,16 @@ namespace SAutoCarry.Champions
         {
             if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo)
             {
-                LeagueSharp.Common.Utility.DelayAction.Add((int)(Spells[Q].Instance.CooldownExpires - Game.Time) * 1000, () =>
-                    {
-                        if (Spells[Q].IsReady() && args.Target != null && args.Target.IsValidTarget(ObjectManager.Player.AttackRange + 100))
-                            Spells[Q].Cast();
-                    });
+                if (!Spells[Q].IsReady())
+                {
+                    LeagueSharp.Common.Utility.DelayAction.Add(100, () =>
+                        {
+                            if (Spells[Q].IsReady() && args.Target != null && args.Target.IsValidTarget(ObjectManager.Player.AttackRange + 100))
+                                Spells[Q].Cast();
+                        });
+                }
+                else
+                    Spells[Q].Cast();
             }
             else if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
             {

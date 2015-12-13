@@ -734,12 +734,12 @@ namespace SCommon.Orbwalking
                 m_lastAttackPos = ObjectManager.Player.ServerPosition.To2D();
                 m_attackInProgress = true;
 
-                LeagueSharp.Common.Utility.DelayAction.Add((int)(args.Path.First().Distance(args.Path.Last()) / args.Speed * 1000), () =>
+                LeagueSharp.Common.Utility.DelayAction.Add((int)Math.Max(1, (args.Path.First().Distance(args.Path.Last()) / args.Speed * 1000)), () =>
                 {
                     m_lastWindUpTick = Utils.TickCount;
                     m_attackInProgress = false;
                     Events.FireAfterAttack(this, m_lastTarget);
-                    ResetAATimer();
+                    //ResetAATimer();
                 });
             }
         }

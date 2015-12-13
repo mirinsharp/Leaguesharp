@@ -28,8 +28,8 @@ namespace SCommon.Damage
         /// <returns>true if last hitable</returns>
         public static bool IsLastHitable(Obj_AI_Base unit, float extraWindup = 0)
         {
-            float health = unit.Health - GetPrediction(unit, (unit.Distance(ObjectManager.Player.ServerPosition) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 1000f);
-            return health <= AutoAttack.GetDamage(unit, true);
+            float health = unit.Health - GetPrediction(unit, (unit.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D()) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 1000f - Game.Ping / 2f);
+            return health < AutoAttack.GetDamage(unit, true);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace SCommon.Damage
         public static bool IsTwoHitable(Obj_AI_Base unit)
         {
             float health = unit.Health - GetPrediction(unit, (unit.Distance(ObjectManager.Player.ServerPosition) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 2 * 1000f);
-            return health <= AutoAttack.GetDamage(unit);
+            return health < AutoAttack.GetDamage(unit);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace SCommon.Damage
         public static bool IsUnkillable(Obj_AI_Base unit, int t = 0)
         {
             float health = unit.Health - GetPrediction(unit, ((unit.Distance(ObjectManager.Player.ServerPosition) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 2f) * 1000f);
-            return health <= AutoAttack.GetDamage(unit);
+            return health < AutoAttack.GetDamage(unit);
         }
 
         /// <summary>
@@ -76,17 +76,22 @@ namespace SCommon.Damage
                             float arriveTime = (attack.StartTick + attack.Delay + maxTravelTime) - Utils.TickCount;
                             if (arriveTime <= t && arriveTime > 0) //if minion's missile arrives earlier than me
                                 dmg += attack.Damage; //add minion's dmg
+
+                            t -= attack.AnimationTime;
+
                             if (checkSeq)
                             {
                                 int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
-                                for (int i = 0; i < seqAttacks; i++)
+                                for (int i = 1; i < seqAttacks; i++)
                                 {
                                     arriveTime = attack.Delay + maxTravelTime;
                                     if (arriveTime <= t)
                                     {
                                         dmg += attack.Damage;
-                                        t -= arriveTime;
+                                        t -= attack.AnimationTime;
                                     }
+                                    else
+                                        break;
                                 }
                             }
                         }
@@ -95,20 +100,27 @@ namespace SCommon.Damage
                             if (attack.Source.Type != GameObjectType.obj_AI_Turret)
                             {
                                 float elapsedTick = Utils.TickCount - attack.StartTick;
-                                float arriveTime = attack.AnimationTime - elapsedTick + attack.Delay + maxTravelTime + Game.Ping / 2f;
-                                if (arriveTime <= t && attack.AnimationTime - elapsedTick > 0)
-                                    dmg += attack.Damage;
-
-                                if (checkSeq)
+                                if (attack.AnimationTime - elapsedTick > 0)
                                 {
-                                    int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
-                                    for (int i = 0; i < seqAttacks; i++)
+                                    float arriveTime = attack.AnimationTime - elapsedTick + attack.Delay + maxTravelTime;
+                                    if (arriveTime <= t)
+                                        dmg += attack.Damage;
+
+                                    t -= attack.AnimationTime + (attack.AnimationTime - elapsedTick);
+
+                                    if (checkSeq)
                                     {
-                                        arriveTime = attack.Delay + maxTravelTime;
-                                        if (arriveTime <= t)
+                                        int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
+                                        for (int i = 1; i < seqAttacks; i++)
                                         {
-                                            dmg += attack.Damage;
-                                            t -= arriveTime;
+                                            arriveTime = attack.Delay + maxTravelTime;
+                                            if (arriveTime <= t)
+                                            {
+                                                dmg += attack.Damage;
+                                                t -= attack.AnimationTime;
+                                            }
+                                            else
+                                                break;
                                         }
                                     }
                                 }

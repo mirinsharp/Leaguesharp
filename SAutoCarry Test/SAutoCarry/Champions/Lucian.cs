@@ -210,13 +210,13 @@ namespace SAutoCarry.Champions
                 }
 
                 if (Spells[W].IsReady() && ComboUseW)
-                    Spells[W].SPredictionCast(t, HitChance.High);
+                    Spells[W].Cast(Spells[W].GetSPrediction(t).CastPosition);
             }
             else if (args.Target != null && args.Target is Obj_AI_Base && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
             {
                 var jungleMob = MinionManager.GetMinions(Spells[Q].Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
                 if (jungleMob != null)
-                {
+                {   
                     if (Spells[E].IsReady())
                     {
                         Spells[E].Cast(Game.CursorPos);

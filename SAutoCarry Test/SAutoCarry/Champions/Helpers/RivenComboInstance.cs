@@ -112,7 +112,11 @@ namespace SAutoCarry.Champions.Helpers
                 }
 
                 if (!Animation.CanAttack() && Animation.CanCastAnimation && !Me.Spells[W].IsReady() && !Me.CheckR1(t))
+                {
+                    if (Animation.QStacks != 0 && Me.CalculateAADamage(t, 2) + (Me.Spells[E].IsReady() && Me.Spells[W].IsReady(2000) ? Me.Spells[W].GetDamage(t) : 0) + (Me.Spells[E].IsReady() && ObjectManager.Player.HasBuff("RivenFengShuiEngine") && Me.Spells[R].IsReady() ? Me.CalculateDamageR2(t) : 0) > t.Health && ObjectManager.Player.HealthPercent > 20)
+                        return;
                     Me.FastQCombo();
+                }
             };
 
             MethodsOnAnimation[0] = (t, animname) =>
@@ -158,7 +162,7 @@ namespace SAutoCarry.Champions.Helpers
                     if (t != null && Me.CheckR2(t))
                     {
                         if (animname == "Spell3") //q3 r2
-                            Utility.DelayAction.Add(393 - Game.Ping, () => Me.Spells[R].Cast(t.ServerPosition));
+                            Utility.DelayAction.Add(393 - Game.Ping, () => { Game.Say("/d"); Me.Spells[R].Cast(t.ServerPosition); });
                     }
                 }
             };

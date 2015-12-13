@@ -289,8 +289,6 @@ namespace SAutoCarry.Champions
                 var t = Target.Get(Spells[Q].Range);
                 if (t != null)
                 {
-                    if (CalculateAADamage(t, 2) + base.CalculateAADamage(t, 1) + (Spells[E].IsReady() && Spells[W].IsReady(2000) ? Spells[W].GetDamage(t) : 0) + (Spells[E].IsReady() && ObjectManager.Player.HasBuff("RivenFengShuiEngine") && Spells[R].IsReady() ? CalculateDamageR2(t) : 0) > t.Health && ObjectManager.Player.HealthPercent > 20)
-                        return;
                     Target.Set(t);
                     Orbwalker.ForcedTarget = t;
                     Animation.SetAttack(true);

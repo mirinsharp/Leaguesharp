@@ -183,10 +183,13 @@ namespace SCommon.Orbwalking
         /// </summary>
         public void ResetAATimer()
         {
-            m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
-            m_lastAttackTick = 0;
-            m_attackReset = true;
-            m_attackInProgress = false;
+            if (m_baseAttackSpeed == 0.5f)
+            {
+                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
+                m_lastAttackTick = 0;
+                m_attackReset = true;
+                m_attackInProgress = false;
+            }
         }
 
         /// <summary>
@@ -404,8 +407,8 @@ namespace SCommon.Orbwalking
         {
             if (m_lastAttackTick < Utils.TickCount && !m_attackInProgress)
             {
-                m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 20);
-                //m_lastAATick = Utils.TickCount + Game.Ping / 2;
+                m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 50);
+                m_lastAATick = Utils.TickCount + Game.Ping / 2;
                 m_attackInProgress = true;
                 ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
@@ -675,7 +678,7 @@ namespace SCommon.Orbwalking
             if (ActiveMode == Mode.None || ObjectManager.Player.IsCastingInterruptableSpell(true) || ObjectManager.Player.IsDead)
                 return;
 
-            if (CanMove())
+            if (CanMove() && m_attackInProgress)
                 m_attackInProgress = false;
 
             var m_lastTarget = GetTarget();

@@ -143,7 +143,6 @@ namespace SCommon.Prediction
                 predMenu = new Menu("SPrediction", "SPRED");
                 predMenu.AddItem(new MenuItem("PREDICTONLIST", "Prediction Method").SetValue(new StringList(new[] { "SPrediction", "Common Predicion" }, 0)));
                 predMenu.AddItem(new MenuItem("SPREDWINDUP", "Check for target AA Windup").SetValue(true));
-                predMenu.AddItem(new MenuItem("SPREDWPANALYSIS", "Waypoint analysis splitting method").SetValue(new StringList(new[] { "By target bounding radius", "By spell width" }, 1)));
                 predMenu.AddItem(new MenuItem("SPREDMAXRANGEIGNORE", "Max Range Dodge Ignore (%)").SetValue(new Slider(50, 0, 100)));
                 predMenu.AddItem(new MenuItem("SPREDREACTIONDELAY", "Ignore Rection Delay").SetValue<Slider>(new Slider(0, 0, 200)));
                 predMenu.AddItem(new MenuItem("SPREDDELAY", "Spell Delay").SetValue<Slider>(new Slider(0, 0, 200)));
@@ -651,19 +650,17 @@ namespace SCommon.Prediction
                 {
                     Vector2 direction = (path[k + 1] - path[k]).Normalized();
                     float distance = width;
-                    if (predMenu.Item("SPREDWPANALYSIS").GetValue<StringList>().SelectedIndex == 0)
-                        distance = target.BoundingRadius;
 
                     int steps = (int)Math.Floor(path[k].Distance(path[k + 1]) / distance);
                     //split & anlyse current path
                     for (int i = 0; i < steps; i++)
                     {
-                        Vector2 pA = path[k] + (direction * distance * i);
-                        Vector2 pB = path[k] + (direction * distance * (i + 1));
-                        Vector2 center = (pA + pB) / 2f;
+                        Vector2 pCenter = path[k] + (direction * distance * i);
+                        Vector2 pA = pCenter - (direction * (target.BoundingRadius - width / 2f));
+                        Vector2 pB = pCenter + (direction * (target.BoundingRadius + width / 2f));
 
-                        float flytime = missileSpeed != 0 ? from.Distance(center) / missileSpeed : 0f;
-                        float t = flytime + delay + Game.Ping / 1000f + SpellDelay / 1000f;
+                        float flytime = missileSpeed != 0 ? from.Distance(pCenter) / missileSpeed : 0f;
+                        float t = flytime + delay + Game.Ping / 2000f + SpellDelay / 1000f;
 
                         Vector2 currentPosition = isDash ? target.Position.To2D() : target.ServerPosition.To2D();
 
@@ -673,22 +670,11 @@ namespace SCommon.Prediction
                         if (Math.Min(arriveTimeA, arriveTimeB) <= t && Math.Max(arriveTimeA, arriveTimeB) >= t)
                         {
                             result.HitChance = GetHitChance(t, avgt, movt, avgp);
-                            result.CastPosition = center;
-                            result.UnitPosition = center + (direction * (t - Math.Min(arriveTimeA, arriveTimeB)) * moveSpeed);
+                            result.CastPosition = pCenter;
+                            result.UnitPosition = pCenter + (direction * (t - Math.Min(arriveTimeA, arriveTimeB)) * moveSpeed);
                             result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
                             return result;
                         }
-                    }
-
-                    if (steps == 0)
-                    {
-                        float flytime = missileSpeed != 0 ? from.Distance(path[pathBounds[1]]) / missileSpeed : 0f;
-                        float t = flytime + delay + Game.Ping / 2000f + SpellDelay / 1000f;
-                        result.HitChance = GetHitChance(t, avgt, movt, avgp);
-                        result.CastPosition = path[pathBounds[1]];
-                        result.UnitPosition = path[pathBounds[1]];
-                        result.CollisionResult = Collision.GetCollisions(from, result.CastPosition, width, delay, missileSpeed);
-                        return result;
                     }
                 }
             }

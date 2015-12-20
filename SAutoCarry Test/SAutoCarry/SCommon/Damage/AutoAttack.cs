@@ -67,63 +67,63 @@ namespace SCommon.Damage
                     GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 15 + ObjectManager.Player.AbilityPower() * 15 / 100)
                 });
 
-            //Devourer
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3710,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
-                });
+            ////Devourer
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3710,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3718,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3718,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3722,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3722,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3722,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3722,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 30 * 1) //devourer stacks are not calculated yet
+            //    });
 
-            //Sated Devourer
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3930,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50) 
-                });
+            ////Sated Devourer
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3930,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50) 
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3931,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50) 
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3931,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50) 
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3932,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50)
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3932,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50)
+            //    });
 
-            ItemPassives.Add(
-                new ItemPassive
-                {
-                    ItemID = 3933,
-                    GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50)
-                });
+            //ItemPassives.Add(
+            //    new ItemPassive
+            //    {
+            //        ItemID = 3933,
+            //        GetDamage = (s, t) => (float)s.CalcDamage(t, LeagueSharp.Common.Damage.DamageType.Magical, 50)
+            //    });
             #endregion
 
             //to do: kalista w passive
@@ -463,9 +463,9 @@ namespace SCommon.Damage
         {
             var hero = ObjectManager.Player;
 
-            double result = hero.TotalAttackDamage;
-            var k = hero.ChampionName == "Kalista" ? 0.9d : 1d;
-            var reduction = 0d;
+            float result = hero.TotalAttackDamage;
+            float k = hero.ChampionName == "Kalista" ? 0.9f : 1f;
+            float reduction = 0f;
 
             #region relic shield
             var minionTarget = target as Obj_AI_Minion;
@@ -504,19 +504,26 @@ namespace SCommon.Damage
             {
                 // Ninja tabi
                 if (Items.HasItem(3047, targetHero))
-                    k *= 0.9d;
+                    k *= 0.9f;
 
                 // Nimble Fighter
                 if (targetHero.ChampionName == "Fizz")
                     reduction += new int[] { 4, 4, 4, 6, 6, 6, 8, 8, 8, 10, 10, 10, 12, 12, 12, 14, 14, 14 }[targetHero.Level - 1];
             }
 
-            var mastery = ObjectManager.Player.Masteries.FirstOrDefault(p => p.Page == MasteryPage.Cunning);
-            if (mastery != null)
-                result += Math.Min(5, (int)mastery.Points);
+            if (passiveCheck)
+            {
+                var mastery = ObjectManager.Player.Masteries.FirstOrDefault(p => p.Page == MasteryPage.Cunning);
+                if (mastery != null)
+                    result += Math.Min(5, (int)mastery.Points);
 
-            float dmg = (float)LeagueSharp.Common.Damage.CalcDamage(hero, target, LeagueSharp.Common.Damage.DamageType.Physical, (result - reduction) * k);
-            
+            }
+            //float dmg = (float)LeagueSharp.Common.Damage.CalcDamage(hero, target, LeagueSharp.Common.Damage.DamageType.Physical, (result - reduction) * k + (passiveCheck ? PassiveFlatMod(ObjectManager.Player, target) : 0));
+            float dmg = 0f;
+            if (target.Type == GameObjectType.obj_AI_Minion)
+                dmg = CalcPhysicalDamage(hero, target, (result - reduction) * k);
+            else
+                dmg = (float)ObjectManager.Player.CalcDamage(target, LeagueSharp.Common.Damage.DamageType.Physical, k + (passiveCheck ? PassiveFlatMod(ObjectManager.Player, target) : 0));
             if (hero.ChampionName == "Azir")
             {
                 int cnt = ObjectManager.Get<GameObject>().Count(p => p.IsAlly && p.Name == "AzirSoldier" && p.Position.Distance(target.Position) < 315);
@@ -525,6 +532,11 @@ namespace SCommon.Damage
                     dmg = (float)hero.CalcDamage(target, LeagueSharp.Common.Damage.DamageType.Magical, new[] { 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180 }[ObjectManager.Player.Level - 1] + 0.6f * hero.AbilityPower());
                     return dmg + dmg * 0.25f * (cnt - 1) - 1;
                 }
+            }
+            else if (hero.ChampionName == "Pantheon")
+            {
+                if (target.HealthPercent <= 15 && hero.Spellbook.GetSpell(SpellSlot.E).Level > 0)
+                    dmg *= 2;
             }
 
             if (passiveCheck)
@@ -535,7 +547,64 @@ namespace SCommon.Damage
                 dmg += ItemPassives.Where(p => Items.HasItem(p.ItemID)).Sum(passive => passive.GetDamage(hero, target));
             }
 
-            return (float)Math.Floor(dmg);
+            return (float)Math.Floor(dmg) - 1f;
+        }
+
+        private static float PassiveFlatMod(Obj_AI_Hero source, Obj_AI_Base target)
+        {
+            float value = 0f;
+            
+             //Offensive masteries:
+
+            //Fervor of Battle: STACKTIVATE Your basic attacks and spells give you stacks of Fervor for 5 seconds, stacking 10 times. Each stack of Fervor adds 1-8 bonus physical damage to your basic attacks against champions, based on your level.
+            if (target.Type == GameObjectType.obj_AI_Hero)
+            {
+                Mastery Fervor = ObjectManager.Player.Masteries.FirstOrDefault(p => p.Page == MasteryPage.Ferocity && p.Id == (int)Ferocity.FervorofBattle);
+                if (Fervor != null && Fervor.Points >= 1)
+                    value += (0.9f + source.Level * 0.42f) * source.GetBuffCount("MasteryOnHitDamageStacker");
+            }
+
+            // Defensive masteries:
+
+            //Tough Skin DIRT OFF YOUR SHOULDERS You take 2 less damage from champion and monster basic attacks
+            if (target.Type == GameObjectType.obj_AI_Hero)
+            {
+                Mastery Toughskin = ObjectManager.Player.Masteries.FirstOrDefault(p => p.Page == MasteryPage.Resolve && p.Id == (int)Resolve.ToughSkin);
+                if (Toughskin != null && Toughskin.Points >= 1)
+                    value -= 2;
+            }
+
+            return value;
+        }
+
+        private static float CalcPhysicalDamage(Obj_AI_Hero source, Obj_AI_Base target, float amount)
+        {
+            int t = Environment.TickCount;
+            float armorPenetrationPercent = source.PercentArmorPenetrationMod;
+            float armorPenetrationFlat = source.FlatArmorPenetrationMod;
+            float bonusArmorPenetrationMod = source.PercentBonusArmorPenetrationMod;
+            // Penetration can't reduce armor below 0.
+
+            float armor = 0;
+            float bonusArmor = 0;
+
+
+            t = Environment.TickCount;
+            float value;
+            if (armor < float.Epsilon)
+            {
+                value = 2f - 100f / (100f - armor);
+            }
+            else if ((armor * armorPenetrationPercent) - (bonusArmor * (1f - bonusArmorPenetrationMod)) - armorPenetrationFlat < float.Epsilon)
+            {
+                value = 2f;
+            }
+            else
+            {
+                value = 100f / (100f + (armor * armorPenetrationPercent) - (bonusArmor * (1f - bonusArmorPenetrationMod)) - armorPenetrationFlat);
+            }
+
+            return amount;
         }
 
         private class Damage

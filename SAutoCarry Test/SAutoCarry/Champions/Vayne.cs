@@ -7,6 +7,8 @@ using SCommon.PluginBase;
 using SCommon.Prediction;
 using SAutoCarry.Champions.Helpers;
 using SharpDX;
+//typedefs
+//using TargetSelector = SCommon.TS.TargetSelector;
 
 namespace SAutoCarry.Champions
 {
@@ -21,6 +23,8 @@ namespace SAutoCarry.Champions
             OnDraw += BeforeDraw;
             OnCombo += Combo;
             OnHarass += Harass;
+
+            //TargetSelector.RegisterCustomMultipler((hero) => hero.GetBuffCount("vaynesilvereddebuff"));
         }
 
         public override void CreateConfigMenu()
@@ -151,7 +155,7 @@ namespace SAutoCarry.Champions
                         Spells[Q].Cast(Game.CursorPos);
                     else
                     {
-                        if(LaneClearQ)
+                        if (LaneClearQ && args.Target.Health - SCommon.Damage.AutoAttack.GetDamage(args.Target as Obj_AI_Base, true) <= 0)
                         {
                             var minion = MinionManager.GetMinions(ObjectManager.Player.AttackRange + 100).Where(p => p.Health <= SCommon.Damage.AutoAttack.GetDamage(p) + ObjectManager.Player.GetSpellDamage(p, SpellSlot.Q)).FirstOrDefault();
                             if(minion != null)

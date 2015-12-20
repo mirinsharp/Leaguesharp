@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SCommon.Database;
 using SCommon.PluginBase;
 
 namespace SAutoCarry.Champions.Helpers

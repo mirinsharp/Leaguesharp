@@ -3,11 +3,14 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SCommon;
+using SCommon.Maths;
+using SCommon.Database;
 using SCommon.PluginBase;
 using SCommon.Prediction;
-using SCommon.Maths;
 using SUtility.Drawings;
 using SharpDX;
+//typedefs
+//using TargetSelector = SCommon.TS.TargetSelector;
 
 namespace SAutoCarry.Champions
 {
@@ -73,7 +76,7 @@ namespace SAutoCarry.Champions
             Spells[W] = new Spell(SpellSlot.W, 900 + 150);
             Spells[W].SetSkillshot(1.25f, 200f, 0, false, SkillshotType.SkillshotCircle);
 
-            Spells[E] = new Spell(SpellSlot.E, 700, TargetSelector.DamageType.Magical);
+            Spells[E] = new Spell(SpellSlot.E, 700);
             Spells[E].SetSkillshot(0.5f, 350f, 0, false, SkillshotType.SkillshotCircle);
 
             Spells[R] = new Spell(SpellSlot.R, 650);
@@ -87,7 +90,7 @@ namespace SAutoCarry.Champions
 
             foreach (var enemy in HeroManager.Enemies)
             {
-                if (enemy.IsValidTarget(Spells[W].Range - 150) && SCommon.PluginBase.Utility.IsImmobileTarget(enemy) && autoW)
+                if (enemy.IsValidTarget(Spells[W].Range - 150) && enemy.IsImmobilized() && autoW)
                     Spells[W].Cast(enemy.ServerPosition);
 
                 if (enemy.IsValidTarget(Spells[R].Range) && autoR && !ConfigMenu.Item("SAutoCarry.Veigar.AutoR.DontUlt" + enemy.ChampionName).GetValue<bool>())
@@ -106,7 +109,7 @@ namespace SAutoCarry.Champions
             bool waitforE = false;
             if (Spells[E].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Combo.UseE").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(1000, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                 {
                     Spells[E].SPredictionCastRing(t, 80, HitChance.High, ConfigMenu.Item("SAutoCarry.Veigar.Combo.EMode").GetValue<StringList>().SelectedIndex == 0);
@@ -116,21 +119,21 @@ namespace SAutoCarry.Champions
 
             if (Spells[W].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Combo.UseW").GetValue<bool>() && !waitforE)
             {
-                var t = TargetSelector.GetTarget(Spells[W].Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[W].Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                     Spells[W].SPredictionCast(t, HitChance.High);
             }
 
             if (Spells[R].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Combo.UseR").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Spells[R].Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[R].Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null && CalculateComboDamage(t, 4) >= t.Health)
                     Spells[R].CastOnUnit(t);
             }
 
             if (Spells[Q].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Combo.UseQ").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[Q].Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                     Spells[Q].SPredictionCast(t, HitChance.High);
             }
@@ -145,7 +148,7 @@ namespace SAutoCarry.Champions
 
             if (Spells[E].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Harass.UseE").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(1000, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                 {
                     Spells[E].SPredictionCastRing(t, 80, HitChance.High, ConfigMenu.Item("SAutoCarry.Veigar.Harass.EMode").GetValue<StringList>().SelectedIndex == 0);
@@ -155,14 +158,14 @@ namespace SAutoCarry.Champions
 
             if (Spells[W].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Harass.UseW").GetValue<bool>() && !waitforE)
             {
-                var t = TargetSelector.GetTarget(Spells[W].Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[W].Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                     Spells[W].SPredictionCast(t, HitChance.High);
             }
 
             if (Spells[Q].IsReady() && ConfigMenu.Item("SAutoCarry.Veigar.Harass.UseQ").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(Spells[Q].Range, LeagueSharp.Common.TargetSelector.DamageType.Magical);
                 if (t != null)
                     Spells[Q].SPredictionCast(t, HitChance.High);
             }

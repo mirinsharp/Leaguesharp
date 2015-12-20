@@ -27,7 +27,7 @@ namespace SAutoCarry.Champions.Helpers
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.Draw", "Draw").SetValue(true));
             Menu whitelist = new Menu("Whitelist", "SAutoCarry.Helpers.Condemn.WhiteList");
             foreach(var enemy in HeroManager.Enemies)
-                whitelist.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.WhiteList" + enemy.ChampionName, "Condemn " + enemy.Name).SetValue(true));
+                whitelist.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.WhiteList" + enemy.ChampionName, "Condemn " + enemy.ChampionName).SetValue(true));
             condemn.AddSubMenu(whitelist);
             s_Champion.ConfigMenu.AddSubMenu(condemn);
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -38,7 +38,7 @@ namespace SAutoCarry.Champions.Helpers
 
         static void Drawing_OnDraw(EventArgs args)
         {
-            if (s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.Draw").GetValue<bool>())
+            if (s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.Draw").GetValue<bool>() && s_Champion.Spells[2].IsReady())
             {
                 foreach (var enemy in HeroManager.Enemies)
                 {
@@ -119,9 +119,10 @@ namespace SAutoCarry.Champions.Helpers
                         float x = ObjectManager.Player.Position.X + outRadius * (float)Math.Cos(angle);
                         float y = ObjectManager.Player.Position.Y + outRadius * (float)Math.Sin(angle);
                         targetPosition = Geometry.PositionAfter(target.GetWaypoints(), 300, (int)target.MoveSpeed);
-                        if (targetPosition.Distance(new Vector2(x, y)) < 550f && IsCondemnable(new Vector2(x, y), targetPosition, target.BoundingRadius, 300f))
+                        var vec = new Vector2(x, y);
+                        if (targetPosition.Distance(vec) < 550f && IsCondemnable(vec, targetPosition, target.BoundingRadius, 300f) && Tumble.IsSafe(target, vec.To3D2(), false).IsValid())
                         {
-                            s_Champion.Spells[Champion.Q].Cast(new Vector2(x, y));
+                            s_Champion.Spells[Champion.Q].Cast(vec);
                             return false;
                         }
                     }

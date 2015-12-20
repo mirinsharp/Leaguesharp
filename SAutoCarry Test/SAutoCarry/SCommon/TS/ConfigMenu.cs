@@ -16,7 +16,7 @@ namespace SCommon.TS
 
             Menu champPrio = new Menu("Champion Priority", "TargetSelector.Priority");
             foreach (var enemy in HeroManager.Enemies)
-                champPrio.AddItem(new MenuItem(String.Format("TargetSelector.Priority.{0}", enemy.CharData.BaseSkinName), enemy.CharData.BaseSkinName).SetValue(new Slider(1, 1, 5)));
+                champPrio.AddItem(new MenuItem(String.Format("TargetSelector.Priority.{0}", enemy.ChampionName), enemy.ChampionName).SetValue(new Slider(1, 1, 5)));
 
             s_Config.AddSubMenu(champPrio);
 
@@ -67,7 +67,16 @@ namespace SCommon.TS
         /// <returns>Given enemy's priority which set by user</returns>
         public static int GetChampionPriority(Obj_AI_Hero enemy)
         {
-            return s_Config.Item(String.Format("TargetSelector.Priority.{0}", enemy.CharData.BaseSkinName)).GetValue<Slider>().Value;
+            if (enemy == null)
+                return 1;
+            try
+            {
+                return s_Config.Item(String.Format("TargetSelector.Priority.{0}", enemy.ChampionName)).GetValue<Slider>().Value;
+            }
+            catch
+            {
+                return 1;
+            }
         }
     }
 }

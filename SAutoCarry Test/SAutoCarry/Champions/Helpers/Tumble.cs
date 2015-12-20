@@ -32,7 +32,7 @@ namespace SAutoCarry.Champions.Helpers
         
         public static Vector3 FindTumblePosition(Obj_AI_Hero target)
         {
-            if ((Only2W || (s_Champion.Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Mixed && Only2WHarass)) && target.GetBuffCount("vaynesilvereddebuff") != 2)
+            if ((Only2W || (s_Champion.Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Mixed && Only2WHarass)) && target.GetBuffCount("vaynesilvereddebuff") == 1) // == 1 cuz calling this after attack which is aa missile still flying
                 return Vector3.Zero;
 
             if(WallIfPossible)
@@ -77,17 +77,19 @@ namespace SAutoCarry.Champions.Helpers
             return Vector3.Zero;
         }
 
-        public static Vector3 IsSafe(Obj_AI_Hero target, Vector3 vec)
+        public static Vector3 IsSafe(Obj_AI_Hero target, Vector3 vec, bool checkTarget = true)
         {
             if (DontSafeCheck)
                 return vec;
 
-            if (target.IsMelee && target.ServerPosition.To2D().Distance(vec) <= target.BasicAttack.CastRange)
-                return Vector3.Zero;
+            if (checkTarget)
+            {
+                if (target.ServerPosition.To2D().Distance(vec) <= target.AttackRange && vec.CountEnemiesInRange(1000) > 1)
+                    return Vector3.Zero;
 
-            if (DontQIntoEnemies && HeroManager.Enemies.Any(p => p.ServerPosition.To2D().Distance(vec) <= p.AttackRange + ObjectManager.Player.BoundingRadius + (p.IsMelee ? 100 : 0)) || vec.UnderTurret(true))
-                return Vector3.Zero;
-
+                if (((DontQIntoEnemies || target.IsMelee) && HeroManager.Enemies.Any(p => p.ServerPosition.To2D().Distance(vec) <= p.AttackRange + ObjectManager.Player.BoundingRadius + (p.IsMelee ? 100 : 0))) || vec.UnderTurret(true))
+                    return Vector3.Zero;
+            }
             if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.AttackRange + (p.IsMelee ? 50 : 0)) || vec.UnderTurret(true))
                 return Vector3.Zero;
 

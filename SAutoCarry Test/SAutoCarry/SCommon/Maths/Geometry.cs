@@ -350,5 +350,16 @@ namespace SCommon.Maths
             Vector2 v = (point - center);
             return center + v / v.Length() * radius;
         }
+
+        internal static Vector2 Deviation(Vector2 point1, Vector2 point2, double angle)
+        {
+            angle *= Math.PI / 180.0;
+            Vector2 temp = Vector2.Subtract(point2, point1);
+            Vector2 result = new Vector2(0);
+            result.X = (float)(temp.X * Math.Cos(angle) - temp.Y * Math.Sin(angle)) / 4;
+            result.Y = (float)(temp.X * Math.Sin(angle) + temp.Y * Math.Cos(angle)) / 4;
+            result = Vector2.Add(result, point1);
+            return result;
+        }
     }
 }

@@ -7,7 +7,8 @@ using SCommon.PluginBase;
 using SCommon.Prediction;
 using SCommon.Maths;
 using SharpDX;
-
+//typedefs
+//using TargetSelector = SCommon.TS.TargetSelector;
 
 namespace SAutoCarry.Champions
 {
@@ -32,7 +33,7 @@ namespace SAutoCarry.Champions
             combo.AddItem(new MenuItem("SAutoCarry.Lucian.Combo.UseQEx", "Use Extended Q").SetValue(true));
             combo.AddItem(new MenuItem("SAutoCarry.Lucian.Combo.UseW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("SAutoCarry.Lucian.Combo.UseE", "Use E").SetValue(true)).ValueChanged += (s, ar) => combo.Item("SAutoCarry.Lucian.Combo.EMode").Show(ar.GetNewValue<bool>());
-            combo.AddItem(new MenuItem("SAutoCarry.Lucian.Combo.EMode", "E Mode").SetValue(new StringList(new[] { "Auto Pos", "Cursor Pos" }))).Show(combo.Item("SAutoCarry.Lucian.Combo.UseE").GetValue<bool>());
+            combo.AddItem(new MenuItem("SAutoCarry.Lucian.Combo.EMode", "E Mode").SetValue(new StringList(new[] { "Auto Pos", "Side Pos", "Cursor Pos" }))).Show(combo.Item("SAutoCarry.Lucian.Combo.UseE").GetValue<bool>());
 
             Menu harass = new Menu("Harass", "SAutoCarry.Lucian.Harass");
             harass.AddItem(new MenuItem("SAutoCarry.Lucian.Harass.UseQEx", "Use Extended Q").SetValue(true));
@@ -84,7 +85,7 @@ namespace SAutoCarry.Champions
             if (LockR && TargetSelector.SelectedTarget != null && IsUltActive && TargetSelector.SelectedTarget.Path.Length > 0)
                 Orbwalker.Orbwalk(null, TargetSelector.SelectedTarget.Path.Last());
 
-            if (HarassToggle)
+            if (HarassToggle && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.None)
                 Harass();
         }
 
@@ -93,7 +94,7 @@ namespace SAutoCarry.Champions
             if (CheckPassive && HasPassive)
                 return;
 
-            var t = TargetSelector.GetTarget(Spells[Q].Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(Spells[Q].Range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
             if (t != null)
             {
                 if (Spells[Q].IsReady())
@@ -127,7 +128,7 @@ namespace SAutoCarry.Champions
 
         public void ExtendedQ()
         {
-            var t = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(1200f, LeagueSharp.Common.TargetSelector.DamageType.Physical);
             if (t != null)
             {
                 var enemyHitBox = ClipperWrapper.DefineCircle(LeagueSharp.Common.Geometry.PositionAfter(t.GetWaypoints(), 300, (int)t.MoveSpeed), t.BoundingRadius);
@@ -165,7 +166,11 @@ namespace SAutoCarry.Champions
 
                 return IsSafe(target, ObjectManager.Player.ServerPosition + (target.ServerPosition - ObjectManager.Player.ServerPosition).Normalized().To2D().Rotated(LeagueSharp.Common.Geometry.DegreeToRadian(90 - (vec - ObjectManager.Player.ServerPosition).To2D().AngleBetween((Game.CursorPos - ObjectManager.Player.ServerPosition).To2D()))).To3D() * 300f);
             }
-            else if (ComboEMode == 1)
+            else if(ComboEMode == 1) //side e idea, credits hoola
+            {
+                return SCommon.Maths.Geometry.Deviation(ObjectManager.Player.ServerPosition.To2D(), target.ServerPosition.To2D(), 65).To3D();
+            }
+            else if (ComboEMode == 2)
             {
                 return Game.CursorPos;
             }
@@ -175,7 +180,7 @@ namespace SAutoCarry.Champions
 
         public static Vector3 IsSafe(Obj_AI_Hero target, Vector3 vec)
         {
-            if (target.IsMelee && target.ServerPosition.To2D().Distance(vec) <= target.BasicAttack.CastRange)
+            if (target.ServerPosition.To2D().Distance(vec) <= target.AttackRange && vec.CountEnemiesInRange(1000) > 1)
                 return Vector3.Zero;
 
             if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.BasicAttack.CastRange) || vec.UnderTurret(true))
@@ -210,7 +215,7 @@ namespace SAutoCarry.Champions
                 }
 
                 if (Spells[W].IsReady() && ComboUseW)
-                    Spells[W].Cast(Spells[W].GetSPrediction(t).CastPosition);
+                    Spells[W].SPredictionCast(t, HitChance.Low);
             }
             else if (args.Target != null && args.Target is Obj_AI_Base && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
             {

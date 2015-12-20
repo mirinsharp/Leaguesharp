@@ -4,6 +4,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SCommon;
+using SCommon.Database;
 using SCommon.PluginBase;
 using SCommon.Prediction;
 using SCommon.Orbwalking;
@@ -51,7 +52,7 @@ namespace SAutoCarry.Champions
 
         public void BeforeOrbwalk()
         {
-            if (HarassToggle)
+            if (HarassToggle && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.None)
                 Harass();
         }
 
@@ -72,14 +73,14 @@ namespace SAutoCarry.Champions
             var t = TargetSelector.GetTarget(Spells[W].Range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
             if (t != null)
             {
-                if (Spells[W].IsReady() && ComboUseW)
-                    Spells[W].CastOnUnit(t);
-                
-                if (Spells[E].IsReady() && t.IsImmobileTarget() && ComboUseE)
-                    Spells[E].Cast(Spells[E].GetPrediction(t).CastPosition);
-
                 if (Spells[Q].IsReady() && ComboUseQ)
                     Spells[Q].CastOnUnit(t);
+
+                if (Spells[W].IsReady() && ComboUseW)
+                    Spells[W].CastOnUnit(t);
+
+                if (Spells[E].IsReady() && t.IsImmobilized() && ComboUseE)
+                    Spells[E].Cast(Spells[E].GetPrediction(t).CastPosition);
             }
         }
 
@@ -98,8 +99,8 @@ namespace SAutoCarry.Champions
 
         public void LaneClear()
         {
-            var minion = MinionManager.GetMinions(600f, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if(minion != null && minion.IsJungleMinion())
+            var minion = MinionManager.GetMinions(600f, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
+            if(minion != null)
             {
                 if (Spells[W].IsReady())
                     Spells[W].CastOnUnit(minion);
@@ -175,7 +176,7 @@ namespace SAutoCarry.Champions
 
         public bool HarassToggle
         {
-            get { return ConfigMenu.Item("SAutoCarry.Pantheon.Combo.Toggle").GetValue<KeyBind>().Active; }
+            get { return ConfigMenu.Item("SAutoCarry.Pantheon.Harass.Toggle").GetValue<KeyBind>().Active; }
         }
 
         public int HarassManaPercent

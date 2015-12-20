@@ -107,6 +107,19 @@ namespace SCommon.PluginBase
             }
             CreateConfigMenu();
 
+            Menu credits = new Menu("Credits", "SAutoCarry.Credits.Root");
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Author", "SAutoCarry - Made By Synx"));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.SupportedTitle", "Supported Champions: "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported1", "     ->Azir     "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported2", "    ->Lucian    "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported3", "   ->Pantheon   "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported4", "    ->Rengar    "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported5", "    ->Riven     "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported6", "   ->Shyvana    "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported7", "    ->Vayne     "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Supported8", "    ->Veigar    "));
+            credits.AddItem(new MenuItem("SAutoCarry.Credits.Root.Upvote", "Dont Forget to upvote in DB!"));
+            
             #region Events
             Game.OnUpdate += this.Game_OnUpdate;
             Drawing.OnDraw += this.Drawing_OnDraw;
@@ -120,6 +133,7 @@ namespace SCommon.PluginBase
             #endregion
 
             Prediction.Prediction.Initialize(ConfigMenu);
+            ConfigMenu.AddSubMenu(credits);
         }
 
         public virtual void CreateConfigMenu()

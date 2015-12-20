@@ -14,8 +14,8 @@ namespace SCommon.Orbwalking
         {
             m_orbInstance = instance;
             m_Menu = new Menu("Orbwalking", "Orbwalking.Root");
-            m_Menu.AddItem(new MenuItem("Orbwalking.Root.iExtraWindup", "Extra Windup Time").SetValue(new Slider(40, 0, 100)));
-            m_Menu.AddItem(new MenuItem("Orbwalking.Root.iMovementDelay", "Movement Delay").SetValue(new Slider(30, 0, 1000)));
+            m_Menu.AddItem(new MenuItem("Orbwalking.Root.iExtraWindup", "Extra Windup Time").SetValue(new Slider(0, 0, 100)));
+            m_Menu.AddItem(new MenuItem("Orbwalking.Root.iMovementDelay", "Movement Delay").SetValue(new Slider(0, 0, 1000)));
             m_Menu.AddItem(new MenuItem("Orbwalking.Root.iHoldPosition", "Hold Area Radius").SetValue(new Slider(0, 0, 250)));
             m_Menu.AddItem(new MenuItem("Orbwalking.Root.blLastHit", "Last Hit").SetValue(new KeyBind('X', KeyBindType.Press)));
             m_Menu.AddItem(new MenuItem("Orbwalking.Root.blHarass", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
@@ -24,6 +24,7 @@ namespace SCommon.Orbwalking
 
             Menu misc = new Menu("Misc", "Orbwalking.Misc");
             misc.AddItem(new MenuItem("Orbwalking.Misc.blAttackStructures", "Attack Structures").SetValue(true));
+            misc.AddItem(new MenuItem("Orbwalking.Misc.blFocusNormalWhileTurret", "Focus Last hit minion that not targetted from turret while under turret").SetTooltip("if this option enabled, orbwalker first try to last hit minions which they are not attacked from turret and targetted by ally minions").SetValue(false));
             misc.AddItem(new MenuItem("Orbwalking.Misc.blSupportMode", "Support Mode").SetValue(false));
             misc.AddItem(new MenuItem("Orbwalking.Misc.blDontAttackChampWhileLaneClear", "Dont attack champions while Lane Clear").SetValue(false));
             misc.AddItem(new MenuItem("Orbwalking.Misc.blDontMoveMouseOver", "Mouse over hero to stop move").SetValue(false));
@@ -55,21 +56,8 @@ namespace SCommon.Orbwalking
             m_Menu.AddSubMenu(drawings);
             m_Menu.AddSubMenu(misc);
             menuToAttach.AddSubMenu(m_Menu);
-
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
-
-        private void Game_OnGameLoad(EventArgs args)
-        {
-            if (ExtraWindup == 40 || ExtraWindup == 70)
-            {
-                if (ObjectManager.Player.IsMelee)
-                    ExtraWindup = 70;
-                else
-                    ExtraWindup = 40;
-            }
-        }
-
+        
         /// <summary>
         /// Gets combo key is pressed
         /// </summary>
@@ -136,6 +124,15 @@ namespace SCommon.Orbwalking
         {
             get { return m_Menu.Item("Orbwalking.Misc.blAttackStructures").GetValue<bool>(); }
             set { m_Menu.Item("Orbwalking.Misc.blAttackStructures").SetValue(value); }
+        }
+
+        /// <summary>
+        /// Gets or sets focus normal while turret value
+        /// </summary>
+        public bool FocusNormalWhileTurret
+        {
+            get { return m_Menu.Item("Orbwalking.Misc.blFocusNormalWhileTurret").GetValue<bool>(); }
+            set { m_Menu.Item("Orbwalking.Misc.blFocusNormalWhileTurret").SetValue(value); }
         }
 
         /// <summary>

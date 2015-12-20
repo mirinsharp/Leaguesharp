@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SCommon;
+using SCommon.Database;
 using SCommon.PluginBase;
 using SCommon.Prediction;
 using SharpDX;
@@ -15,6 +16,7 @@ namespace SAutoCarry.Champions
     public class Rengar : Champion
     {
         private Obj_AI_Hero leapTarget = null;
+        private int lastLeap = 0;
         public Rengar()
             : base("Rengar", "SAutoCarry - Rengar")
         {
@@ -78,12 +80,12 @@ namespace SAutoCarry.Champions
 
         public void Combo()
         {
-            if (!ObjectManager.Player.HasBuff("RengarR"))
+            if (!WillLeap)
             {
                 var t = TargetSelector.GetTarget(Spells[E].Range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
                 if (t != null && t.IsValidTarget(Spells[E].Range) && Spells[E].IsReady())
                 {
-                    if (!t.IsValidTarget(SCommon.Orbwalking.Utility.GetRealAARange(t) * 2) && t.IsValidTarget(Spells[E].Range) && HaveFullFerocity)
+                    if (!t.IsValidTarget(SCommon.Orbwalking.Utility.GetRealAARange(t) * 3) && t.IsValidTarget(Spells[E].Range) && HaveFullFerocity)
                         return;
                     Spells[E].SPredictionCast(t, HitChance.High);
                 }
@@ -129,10 +131,7 @@ namespace SAutoCarry.Champions
                         else
                         {
                             if (Spells[E].GetDamage(minion) > minion.Health)
-                            {
-                                if (Spells[E].GetCollision(ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { minion.ServerPosition.To2D() }).Count < 2)
                                     Spells[E].Cast(minion.ServerPosition);
-                            }
                         }
                     }
                 }
@@ -144,13 +143,23 @@ namespace SAutoCarry.Champions
             if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && args.Target is Obj_AI_Hero && ComboUseQ)
             {
                 leapTarget = args.Target as Obj_AI_Hero;
-                if (Spells[Q].IsReady())
+                if(Utils.TickCount - lastLeap < 100 && !HaveFullFerocity)
+                {
+                    if (Spells[Q].IsReady())
+                        Spells[Q].Cast();
+                    else
+                        args.Process = false;
+
+                    lastLeap = 0;
+                }
+
+                if (Spells[Q].IsReady() || HaveFullFerocity)
                 {
                     float dmg = 0f;
                     if (HaveFullFerocity)
                         dmg = (float)ObjectManager.Player.CalcDamage(leapTarget, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 45, 60, 75, 90, 105, 120, 135, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240 }[ObjectManager.Player.Level - 1] + (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod) * 0.5f);
                     else
-                        dmg = (float)ObjectManager.Player.CalcDamage(leapTarget, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 60, 90, 120, 150 }[ObjectManager.Player.GetSpell(SpellSlot.Q).Level - 1] + (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod) * new int[] { 0, 5, 10, 15, 20 }[ObjectManager.Player.GetSpell(SpellSlot.Q).Level - 1] / 100f);
+                        dmg = (float)ObjectManager.Player.CalcDamage(leapTarget, LeagueSharp.Common.Damage.DamageType.Physical, new int[] { 30, 60, 90, 120, 150 }[Spells[Q].Level - 1] + (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod) * new int[] { 0, 5, 10, 15, 20 }[ObjectManager.Player.GetSpell(SpellSlot.Q).Level - 1] / 100f);
 
                     if (dmg >= leapTarget.Health || (WillLeap && OneShotComboActive))
                     {
@@ -159,6 +168,9 @@ namespace SAutoCarry.Champions
                             args.Process = false;
                     }
                 }
+
+                if (WillLeap)
+                    Orbwalker.Configuration.DontMoveInRange = true;
             }
         }
 
@@ -166,7 +178,7 @@ namespace SAutoCarry.Champions
         {
             if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && WillLeap && args.Target is Obj_AI_Hero)
             {
-                LeagueSharp.Common.Utility.DelayAction.Add(50, () =>
+                LeagueSharp.Common.Utility.DelayAction.Add(100, () =>
                 {
                     if (ComboUseE && Spells[E].IsReady())
                     {
@@ -184,7 +196,7 @@ namespace SAutoCarry.Champions
         {
             if (sender.IsMe && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && leapTarget != null)
             {
-                LeagueSharp.Common.Utility.DelayAction.Add(args.Duration - 100, () =>
+                LeagueSharp.Common.Utility.DelayAction.Add(Math.Max(1, args.Duration - 200), () =>
                 {
                     if (Items.HasItem(3077) && Items.CanUseItem(3077))
                         Items.UseItem(3077);
@@ -194,6 +206,13 @@ namespace SAutoCarry.Champions
 
                     Spells[W].Cast();
                 });
+                if (HaveFullFerocity)
+                {
+                    lastLeap = args.EndTick;
+                    LeagueSharp.Common.Utility.DelayAction.Add(args.Duration + 250, () => Orbwalker.Configuration.DontMoveInRange = false);
+                }
+                else
+                    LeagueSharp.Common.Utility.DelayAction.Add(args.Duration + 100, () => Orbwalker.Configuration.DontMoveInRange = false);
             }
         }
 
@@ -201,15 +220,7 @@ namespace SAutoCarry.Champions
         {
             if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo)
             {
-                if (!Spells[Q].IsReady())
-                {
-                    LeagueSharp.Common.Utility.DelayAction.Add(100, () =>
-                        {
-                            if (Spells[Q].IsReady() && args.Target != null && args.Target.IsValidTarget(ObjectManager.Player.AttackRange + 100))
-                                Spells[Q].Cast();
-                        });
-                }
-                else
+                if (Spells[Q].IsReady() && ComboUseQ)
                     Spells[Q].Cast();
             }
             else if (Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.LaneClear)
@@ -276,7 +287,7 @@ namespace SAutoCarry.Champions
 
         public bool WillLeap
         {
-            get { return ObjectManager.Player.AttackRange > 125; }
+            get { return ObjectManager.Player.AttackRange > 125 || ObjectManager.Player.HasBuff("RengarR") || ObjectManager.Player.IsDashing(); }
         }
     }
 }

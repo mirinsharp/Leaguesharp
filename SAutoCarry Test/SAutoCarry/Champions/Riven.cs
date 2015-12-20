@@ -39,6 +39,7 @@ namespace SAutoCarry.Champions
             Animation.OnAnimationCastable += Animation_OnAnimationCastable;
             Game.OnWndProc += Game_OnWndProc;
             SCommon.Prediction.Prediction.predMenu.Item("SPREDDRAWINGS").SetValue(false);
+            Orbwalker.Configuration.DontMoveInRange = true;
         }
 
         public override void CreateConfigMenu()
@@ -428,7 +429,7 @@ namespace SAutoCarry.Champions
 
         public void Game_OnWndProc(WndEventArgs args)
         {
-            if (args.Msg == (uint)WindowsMessages.WM_LBUTTONDBLCLCK)
+            if (args.Msg == (uint)WindowsMessages.WM_LBUTTONDBLCLK)
             {
                 var clickedTarget = HeroManager.Enemies
                     .FindAll(hero => hero.IsValidTarget() && hero.Distance(Game.CursorPos, true) < 40000) // 200 * 200

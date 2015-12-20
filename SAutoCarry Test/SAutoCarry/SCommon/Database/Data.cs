@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -11,6 +12,9 @@ namespace SCommon.Database
         private static Dictionary<string, int> s_JunglePrio;
         private static List<WardData> s_WardData;
         private static List<ChampionData> s_ChampionData;
+        private static List<string> s_JungleMinionData;
+        private static string[] s_SiegeMinionData = new [] { "Red_Minion_MechCannon", "Blue_Minion_MechCannon" };
+        private static string[] s_NormalMinionData = new [] { "Red_Minion_Wizard", "Blue_Minion_Wizard", "Red_Minion_Basic", "Blue_Minion_Basic" };
 
         static Data()
         {
@@ -20,11 +24,21 @@ namespace SCommon.Database
             GenerateChampionData();
         }
 
+        /// <summary>
+        /// Gets orginal hitbox value of the hero
+        /// </summary>
+        /// <param name="hero">The hero</param>
+        /// <returns>Orginal hitbox value</returns>
         public static float GetOrginalHitBox(this Obj_AI_Hero hero)
         {
             return s_HeroHitBoxes[hero.ChampionName];
         }
 
+        /// <summary>
+        /// Gets jungle priority of the mob
+        /// </summary>
+        /// <param name="mob">The mob</param>
+        /// <returns>Jungle priority of the mob</returns>
         public static int GetJunglePriority(this Obj_AI_Base mob)
         {
             if (!s_JunglePrio.ContainsKey(mob.Name))
@@ -32,36 +46,123 @@ namespace SCommon.Database
             return s_JunglePrio[mob.Name];
         }
 
+        /// <summary>
+        /// Checks if the unit is ward
+        /// </summary>
+        /// <param name="unit">The unit</param>
+        /// <returns><c>true</c> if the unit is ward</returns>
         public static bool IsWard(this Obj_AI_Base unit)
         {
             return s_WardData.Exists(p => p.Name == unit.Name);
         }
 
+        /// <summary>
+        /// Gets priority of the hero
+        /// </summary>
+        /// <param name="hero">The hero</param>
+        /// <returns>Priority of the hero</returns>
         public static int GetPriority(this Obj_AI_Hero hero)
         {
             return (int)s_ChampionData.Find(p => p.Name == hero.ChampionName).Role;
         }
 
+        /// <summary>
+        /// Gets role of the hero
+        /// </summary>
+        /// <param name="hero">The hero</param>
+        /// <returns>Role of the hero</returns>
         public static ChampionRole GetRole(this Obj_AI_Hero hero)
         {
             return s_ChampionData.Find(p => p.Name == hero.ChampionName).Role;
         }
 
+        /// <summary>
+        /// Gets champion id of the hero
+        /// </summary>
+        /// <param name="hero">The hero</param>
+        /// <returns>ID of the hero</returns>
         public static int GetID(this Obj_AI_Hero hero)
         {
             return s_ChampionData.Find(p => p.Name == hero.ChampionName).ID;
         }
 
+        /// <summary>
+        /// Gets champion id of the hero with given name
+        /// </summary>
+        /// <param name="name">The name of hero</param>
+        /// <returns>ID of the hero</returns>
         public static int GetID(string name)
         {
             return s_ChampionData.Find(p => p.Name == name).ID;
         }
 
+        /// <summary>
+        /// Gets Max. ID of heroes
+        /// </summary>
+        /// <returns>Max ID of heroes</returns>
         public static int GetMaxHeroID()
         {
-            return s_ChampionData.MaxOrDefault(p => p.ID).ID;
+            return s_ChampionData.Max(p => p.ID);
         }
 
+        /// <summary>
+        /// check if the unit is siege minion
+        /// </summary>
+        /// <param name="unit">The unit</param>
+        /// <returns><c>true</c> if the unit is siege minion</returns>
+        public static bool IsSiegeMinion(this Obj_AI_Base unit)
+        {
+            return s_SiegeMinionData.Any(p => unit.Name.Contains(p));
+        }
+
+        /// <summary>
+        /// check if the unit is normal minion
+        /// </summary>
+        /// <param name="unit">The unit</param>
+        /// <returns><c>true</c> if the unit is normal minion</returns>
+        public static bool IsNormalMinion(this Obj_AI_Base unit)
+        {
+            return s_NormalMinionData.Any(p => unit.Name.Contains(p));
+        }
+
+        /// <summary>
+        /// check if the unit is jungle minion
+        /// </summary>
+        /// <param name="unit">The unit</param>
+        /// <returns><c>true</c> if the unit is jungle minion</returns>
+        public static bool IsJungleMinion(this Obj_AI_Base unit)
+        {
+            return s_JungleMinionData.Any(p => p.Contains(unit.Name));
+        }
+
+        /// <summary>
+        /// Checks if the type is immobilize buff type
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <returns><c>true</c> if the type is immobilize buff type</returns>
+        public static bool IsImmobilizeBuff(BuffType type)
+        {
+            return type == BuffType.Snare || type == BuffType.Stun || type == BuffType.Charm || type == BuffType.Knockup || type == BuffType.Suppression;
+        }
+
+        /// <summary>
+        /// Checks if the unit is immobilized
+        /// </summary>
+        /// <param name="unit">The unit</param>
+        /// <returns><c>true</c> if the unit is immobilized</returns>
+        public static bool IsImmobilized(this Obj_AI_Hero unit)
+        {
+            return unit.Buffs.Any(p => IsImmobilizeBuff(p.Type))  || unit.IsChannelingImportantSpell();
+        }
+
+        public static bool IsActive(this Spell s)
+        {
+            return ObjectManager.Player.Spellbook.GetSpell(s.Slot).ToggleState == 2;
+        }
+        
+        /// <summary>
+        /// Generates hitbox data
+        /// </summary>
         private static void GenerateHitBoxData()
         {
             if (s_HeroHitBoxes != null)
@@ -72,6 +173,9 @@ namespace SCommon.Database
                     s_HeroHitBoxes.Add(hero.ChampionName, hero.BBox.Minimum.Distance(hero.BBox.Maximum));
         }
 
+        /// <summary>
+        /// Generates jungle data
+        /// </summary>
         private static void GenerateJungleData()
         {
             if (s_JunglePrio != null)
@@ -130,8 +234,16 @@ namespace SCommon.Database
             s_JunglePrio.Add("TT_NGolem25.1.2", 2);
             s_JunglePrio.Add("TT_NGolem5.1.1", 1);
             s_JunglePrio.Add("AscXerath", 1);
+
+            if (LeagueSharp.Common.Utility.Map.GetMap().Type.Equals(LeagueSharp.Common.Utility.Map.MapType.TwistedTreeline))
+                s_JungleMinionData = new List<string> { "TT_Spiderboss", "TT_NWraith", "TT_NGolem", "TT_NWolf" };
+            else
+                s_JungleMinionData = new List<string> {"SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Red", "SRU_Krug", "SRU_Dragon", "SRU_Baron", "Sru_Crab" };
         }
 
+        /// <summary>
+        /// Generates ward data
+        /// </summary>
         private static void GenerateWardData()
         {
             if (s_WardData != null)
@@ -210,6 +322,9 @@ namespace SCommon.Database
                 );
         }
 
+        /// <summary>
+        /// Generates champion data
+        /// </summary>
         private static void GenerateChampionData()
         {
             if (s_ChampionData != null)
@@ -253,6 +368,7 @@ namespace SCommon.Database
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "Graves", Role = ChampionRole.ADC });
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "Hecarim", Role = ChampionRole.Tank });
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "Heimerdinger", Role = ChampionRole.AP });
+            s_ChampionData.Add(new ChampionData { ID = id++, Name = "Illaoi", Role = ChampionRole.Bruiser });
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "Irelia", Role = ChampionRole.Bruiser });
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "Janna", Role = ChampionRole.Support });
             s_ChampionData.Add(new ChampionData { ID = id++, Name = "JarvanIV", Role = ChampionRole.Bruiser });

@@ -28,30 +28,8 @@ namespace SCommon.Damage
         /// <returns>true if last hitable</returns>
         public static bool IsLastHitable(Obj_AI_Base unit, float extraWindup = 0)
         {
-            float health = unit.Health - GetPrediction(unit, (unit.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D()) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 1000f - Game.Ping / 2f);
+            float health = unit.Health - GetPrediction(unit, (unit.ServerPosition.To2D().Distance(ObjectManager.Player.ServerPosition.To2D()) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 1000f, true);
             return health < AutoAttack.GetDamage(unit, true);
-        }
-
-        /// <summary>
-        /// Checks if given unit is two hitable
-        /// </summary>
-        /// <param name="unit">Unit</param>
-        /// <returns>true if two hitable</returns>
-        public static bool IsTwoHitable(Obj_AI_Base unit)
-        {
-            float health = unit.Health - GetPrediction(unit, (unit.Distance(ObjectManager.Player.ServerPosition) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 2 * 1000f);
-            return health < AutoAttack.GetDamage(unit);
-        }
-
-        /// <summary>
-        /// Checks if given unit is unkillable
-        /// </summary>
-        /// <param name="unit">Unit</param>
-        /// <returns>true if unkillable</returns>
-        public static bool IsUnkillable(Obj_AI_Base unit, int t = 0)
-        {
-            float health = unit.Health - GetPrediction(unit, ((unit.Distance(ObjectManager.Player.ServerPosition) / Orbwalking.Utility.GetProjectileSpeed() + ObjectManager.Player.AttackCastDelay) * 2f) * 1000f);
-            return health < AutoAttack.GetDamage(unit);
         }
 
         /// <summary>
@@ -62,6 +40,7 @@ namespace SCommon.Damage
         /// <returns></returns>
         public static float GetPrediction(Obj_AI_Base unit, float t, bool checkSeq = false)
         {
+
             float dmg = 0.0f;
             foreach (var attack in ActiveAttacks.Values)
             {
@@ -71,57 +50,57 @@ namespace SCommon.Damage
                     {
                         float d = attack.Target.Distance(attack.Source.ServerPosition);
                         float maxTravelTime = d / attack.ProjectileSpeed * 1000f;
-                        if (!attack.Damaged /*&& attack.Processed*/)
+                        if (!attack.Damaged)
                         {
-                            float arriveTime = (attack.StartTick + attack.Delay + maxTravelTime) - Utils.TickCount;
-                            if (arriveTime <= t && arriveTime > 0) //if minion's missile arrives earlier than me
-                                dmg += attack.Damage; //add minion's dmg
-
-                            t -= attack.AnimationTime;
-
-                            if (checkSeq)
+                            if ((attack.Source.IsMelee && !attack.Processed) || !attack.Source.IsMelee)
                             {
-                                int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
-                                for (int i = 1; i < seqAttacks; i++)
+                                float arriveTime = (attack.StartTick + attack.Delay + maxTravelTime) - Utils.TickCount;
+                                if (arriveTime < t && arriveTime > 0) //if minion's missile arrives earlier than me
+                                    dmg += attack.Damage; //add minion's dmg
+
+                                t -= attack.AnimationTime;
+
+                                if (checkSeq)
                                 {
-                                    arriveTime = attack.Delay + maxTravelTime;
-                                    if (arriveTime <= t)
+                                    int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
+                                    for (int i = 1; i < seqAttacks; i++)
                                     {
-                                        dmg += attack.Damage;
-                                        t -= attack.AnimationTime;
+                                        arriveTime = attack.Delay + maxTravelTime;
+                                        if (arriveTime < t)
+                                        {
+                                            dmg += attack.Damage;
+                                            t -= attack.AnimationTime;
+                                        }
+                                        else
+                                            break;
                                     }
-                                    else
-                                        break;
                                 }
                             }
                         }
                         else
                         {
-                            if (attack.Source.Type != GameObjectType.obj_AI_Turret)
+                            float elapsedTick = Utils.TickCount - attack.StartTick;
+                            if (attack.AnimationTime - elapsedTick > 0)
                             {
-                                float elapsedTick = Utils.TickCount - attack.StartTick;
-                                if (attack.AnimationTime - elapsedTick > 0)
+                                float arriveTime = attack.AnimationTime - elapsedTick + attack.Delay + maxTravelTime;
+                                if (arriveTime < t)
+                                    dmg += attack.Damage;
+
+                                t -= attack.AnimationTime + (attack.AnimationTime - elapsedTick);
+
+                                if (checkSeq)
                                 {
-                                    float arriveTime = attack.AnimationTime - elapsedTick + attack.Delay + maxTravelTime;
-                                    if (arriveTime <= t)
-                                        dmg += attack.Damage;
-
-                                    t -= attack.AnimationTime + (attack.AnimationTime - elapsedTick);
-
-                                    if (checkSeq)
+                                    int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
+                                    for (int i = 1; i < seqAttacks; i++)
                                     {
-                                        int seqAttacks = (int)Math.Floor(t / attack.AnimationTime);
-                                        for (int i = 1; i < seqAttacks; i++)
+                                        arriveTime = attack.Delay + maxTravelTime;
+                                        if (arriveTime < t)
                                         {
-                                            arriveTime = attack.Delay + maxTravelTime;
-                                            if (arriveTime <= t)
-                                            {
-                                                dmg += attack.Damage;
-                                                t -= attack.AnimationTime;
-                                            }
-                                            else
-                                                break;
+                                            dmg += attack.Damage;
+                                            t -= attack.AnimationTime;
                                         }
+                                        else
+                                            break;
                                     }
                                 }
                             }
@@ -138,19 +117,15 @@ namespace SCommon.Damage
         {
             return ActiveAttacks.Values.Count(p => p != null && p.Target != null && p.Target.NetworkId == unit.NetworkId);
         }
-        
-        public static PredictedDamage ContainsTowerAttack(Obj_AI_Base unit)
-        {
-            return ActiveAttacks.Values.Find(p => p != null && p.Target != null && p.Target.NetworkId == unit.NetworkId && p.Source.Type == GameObjectType.obj_AI_Turret);
-        }
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!sender.IsValidTarget(3000, false) || sender.Team != ObjectManager.Player.Team || sender is Obj_AI_Hero || !Orbwalking.Utility.IsAutoAttack(args.SData.Name) || !(args.Target is Obj_AI_Base))
+            if (!sender.IsValidTarget(3000, false) || sender.Team != ObjectManager.Player.Team || sender is Obj_AI_Hero || !Orbwalking.Utility.IsAutoAttack(args.SData.Name) || !(args.Target is Obj_AI_Base) || sender.Type == GameObjectType.obj_AI_Turret)
                 return;
 
             var target = (Obj_AI_Base)args.Target;
-            ActiveAttacks.Remove(sender.NetworkId);
+            if(ActiveAttacks.ContainsKey(sender.NetworkId))
+                ActiveAttacks.Remove(sender.NetworkId);
 
             var attackData = new PredictedDamage(
                 sender,
@@ -158,8 +133,8 @@ namespace SCommon.Damage
                 Utils.TickCount - Game.Ping / 2,
                 sender.AttackCastDelay * 1000f,
                 sender.AttackDelay * 1000f,
-                sender.IsMelee() ? int.MaxValue : (int)args.SData.MissileSpeed,
-                (float)sender.GetAutoAttackDamage(target, false));
+                sender.IsMelee() ? float.MaxValue : args.SData.MissileSpeed,
+                (float)sender.GetAutoAttackDamage(target));
             ActiveAttacks.Add(sender.NetworkId, attackData);
         }
 
@@ -184,7 +159,7 @@ namespace SCommon.Damage
         private static void Game_OnUpdate(EventArgs args)
         {
             ActiveAttacks.ToList()
-                .Where(pair => pair.Value.StartTick < Utils.GameTimeTickCount - 3000)
+                .Where(pair => pair.Value.StartTick < Utils.TickCount - 3000)
                 .ToList()
                 .ForEach(pair => ActiveAttacks.Remove(pair.Key));
         }
@@ -222,7 +197,7 @@ namespace SCommon.Damage
             /// <value>
             /// The projectile speed.
             /// </value>
-            public int ProjectileSpeed { get; private set; }
+            public float ProjectileSpeed { get; private set; }
 
             /// <summary>
             /// Gets or sets the source.
@@ -273,7 +248,7 @@ namespace SCommon.Damage
                 int startTick,
                 float delay,
                 float animationTime,
-                int projectileSpeed,
+                float projectileSpeed,
                 float damage)
             {
                 Source = source;

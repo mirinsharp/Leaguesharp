@@ -89,6 +89,7 @@
     <Compile Include="Champions\Helpers\RivenWallJump.cs" />
     <Compile Include="Champions\Helpers\SoldierMgr.cs" />
     <Compile Include="Champions\Helpers\Tumble.cs" />
+    <Compile Include="Champions\Kalista.cs" />
     <Compile Include="Champions\Lucian.cs" />
     <Compile Include="Champions\Pantheon.cs" />
     <Compile Include="Champions\Rengar.cs" />
@@ -116,7 +117,6 @@
     <Compile Include="SCommon\Orbwalking\Utility.cs" />
     <Compile Include="SCommon\PluginBase\Champion.cs" />
     <Compile Include="SCommon\PluginBase\IChampion.cs" />
-    <Compile Include="SCommon\PluginBase\Utility.cs" />
     <Compile Include="SCommon\Prediction\ArcPrediction.cs" />
     <Compile Include="SCommon\Prediction\CirclePrediction.cs" />
     <Compile Include="SCommon\Prediction\Collision.cs" />

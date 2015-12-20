@@ -63,7 +63,7 @@ namespace SAutoCarry.Champions
 
         public void BeforeOrbwalk()
         {
-            if (HarassToggle)
+            if (HarassToggle && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.None)
                 Harass();
         }
 

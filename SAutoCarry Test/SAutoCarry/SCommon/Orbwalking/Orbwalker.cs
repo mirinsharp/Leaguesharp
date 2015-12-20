@@ -76,6 +76,7 @@ namespace SCommon.Orbwalking
             Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
             Obj_AI_Base.OnBuffRemove += Obj_AI_Base_OnBuffRemove;
             Obj_AI_Base.OnNewPath += Obj_AI_Base_OnNewPath;
+            Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
             new Drawings(this);
         }
 
@@ -182,13 +183,10 @@ namespace SCommon.Orbwalking
         /// </summary>
         public void ResetAATimer()
         {
-            if (m_baseAttackSpeed != 0.5f)
-            {
-                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
-                m_lastAttackTick = 0;
-                m_attackReset = true;
-                m_attackInProgress = false;
-            }
+            m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
+            m_lastAttackTick = 0;
+            m_attackReset = true;
+            m_attackInProgress = false;
         }
 
         /// <summary>
@@ -197,6 +195,12 @@ namespace SCommon.Orbwalking
         public void ResetOrbwalkValues()
         {
             m_baseAttackSpeed = 0.5f;
+        }
+
+        public void SetOrbwalkValues()
+        {
+            m_baseWindUp = 1f / (ObjectManager.Player.AttackCastDelay * ObjectManager.Player.GetAttackSpeed());
+            m_baseAttackSpeed = 1f / (ObjectManager.Player.AttackDelay * ObjectManager.Player.GetAttackSpeed());
         }
 
         /// <summary>
@@ -358,55 +362,15 @@ namespace SCommon.Orbwalking
                 }
             }
         }
-
-        public void RegisterCanAttack(Func<bool> fn)
-        {
-            m_fnCanAttack = fn;
-        }
-
-        public void RegisterCanMove(Func<bool> fn)
-        {
-            m_fnCanMove = fn;
-        }
-
-        public void RegisterCanOrbwalkTarget(Func<AttackableUnit, bool> fn)
-        {
-            m_fnCanOrbwalkTarget = fn;
-        }
-
-        public void RegisterShouldWait(Func<bool> fn)
-        {
-            m_fnShouldWait = fn;
-        }
-
-        public void UnRegisterCanAttack()
-        {
-            m_fnCanAttack = null;
-        }
-
-        public void UnRegisterCanMove()
-        {
-            m_fnCanMove = null;
-        }
-
-        public void UnRegisterCanOrbwalkTarget()
-        {
-            m_fnCanOrbwalkTarget = null;
-        }
-
-        public void UnRegisterShouldWait()
-        {
-            m_fnShouldWait = null;
-        }
-
+       
         private float GetAnimationTime()
         {
-            return 1 / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
+            return 1f / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
         }
 
         private float GetWindupTime()
         {
-            return 1 / (ObjectManager.Player.GetAttackSpeed() * m_baseWindUp) + m_Configuration.ExtraWindup;
+            return 1f / (ObjectManager.Player.GetAttackSpeed() * m_baseWindUp) + m_Configuration.ExtraWindup;
         }
 
         private void Move(Vector3 pos)
@@ -441,7 +405,7 @@ namespace SCommon.Orbwalking
             if (m_lastAttackTick < Utils.TickCount && !m_attackInProgress)
             {
                 m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 20);
-                m_lastAATick = Utils.TickCount + Game.Ping / 2;
+                //m_lastAATick = Utils.TickCount + Game.Ping / 2;
                 m_attackInProgress = true;
                 ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }
@@ -547,6 +511,17 @@ namespace SCommon.Orbwalking
             if (m_towerTarget != null && m_towerTarget.IsValidTarget() && CanOrbwalkTarget(m_towerTarget) && !m_towerTarget.IsSiegeMinion())
                 return true;
 
+            if (ObjectManager.Get<Obj_AI_Turret>().Any(p => p.IsValidTarget(950, false, ObjectManager.Player.ServerPosition) && p.IsAlly))
+            {
+                return ObjectManager.Get<Obj_AI_Minion>()
+                    .Any(
+                        minion => minion.IsValidTarget(950) && minion.Team != GameObjectTeam.Neutral &&
+                                  MinionManager.IsMinion(minion, false) && !minion.IsSiegeMinion() &&
+                                  ObjectManager.Get<Obj_AI_Turret>().Any(p => p.IsValidTarget(950, false, minion.ServerPosition) && p.IsAlly) &&
+                                  (minion.Health - Damage.Prediction.GetPrediction(minion, GetAnimationTime() * 1000f * 2f + GetWindupTime() * 1000f, true) <= Damage.AutoAttack.GetDamage(minion, true) * (int)(Math.Ceiling(Damage.Prediction.AggroCount(minion) / 2f))));
+                
+            }
+
             if (m_fnShouldWait != null)
                 return m_fnShouldWait();
 
@@ -556,8 +531,7 @@ namespace SCommon.Orbwalking
                         minion =>
                             (minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral &&
                             Utility.InAARange(minion) && MinionManager.IsMinion(minion, false) &&
-                            ObjectManager.Get<Obj_AI_Turret>().Any(p => p.IsValidTarget(1000, false, minion.ServerPosition) && p.IsAlly && !p.IsSiegeMinion()) &&
-                            (minion.Health - Damage.Prediction.GetPrediction(minion, ObjectManager.Player.AttackDelay * 1000f * 2f, true) <= Damage.AutoAttack.GetDamage(minion, true) * (int)(Math.Ceiling(Damage.Prediction.AggroCount(minion) / 2f)))));
+                            (minion.Health - Damage.Prediction.GetPrediction(minion, GetAnimationTime() * 1000f * 2f + GetWindupTime() * 1000f, true) <= Damage.AutoAttack.GetDamage(minion, true) * (int)(Math.Ceiling(Damage.Prediction.AggroCount(minion) / 2f)))));
 
         }
 
@@ -656,23 +630,62 @@ namespace SCommon.Orbwalking
             return null;
         }
 
+        public void RegisterCanAttack(Func<bool> fn)
+        {
+            m_fnCanAttack = fn;
+        }
+
+        public void RegisterCanMove(Func<bool> fn)
+        {
+            m_fnCanMove = fn;
+        }
+
+        public void RegisterCanOrbwalkTarget(Func<AttackableUnit, bool> fn)
+        {
+            m_fnCanOrbwalkTarget = fn;
+        }
+
+        public void RegisterShouldWait(Func<bool> fn)
+        {
+            m_fnShouldWait = fn;
+        }
+
+        public void UnRegisterCanAttack()
+        {
+            m_fnCanAttack = null;
+        }
+
+        public void UnRegisterCanMove()
+        {
+            m_fnCanMove = null;
+        }
+
+        public void UnRegisterCanOrbwalkTarget()
+        {
+            m_fnCanOrbwalkTarget = null;
+        }
+
+        public void UnRegisterShouldWait()
+        {
+            m_fnShouldWait = null;
+        }
+
         private void Game_OnUpdate(EventArgs args)
         {
             if (ActiveMode == Mode.None || ObjectManager.Player.IsCastingInterruptableSpell(true) || ObjectManager.Player.IsDead)
                 return;
 
-            if (CanMove() && m_attackInProgress)
+            if (CanMove())
                 m_attackInProgress = false;
 
-            var t = GetTarget();
-            m_lastTarget = t;
+            var m_lastTarget = GetTarget();
 
-            if (ObjectManager.Player.IsMelee && m_Configuration.MagnetMelee && t is Obj_AI_Hero)
-                Magnet(t);
+            if (ObjectManager.Player.IsMelee && m_Configuration.MagnetMelee && m_lastTarget is Obj_AI_Hero)
+                Magnet(m_lastTarget);
             else
                 OrbwalkingPoint = Vector3.Zero;
 
-            Orbwalk(t);
+            Orbwalk(m_lastTarget);
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -685,17 +698,14 @@ namespace SCommon.Orbwalking
                     if (!onAttackArgs.Cancel)
                     {
                         m_lastAATick = Utils.TickCount - Game.Ping / 2;
-                        m_lastWindUpTime = (int)(sender.AttackCastDelay * 1000) + 1;
-                        m_lastAttackCooldown = (int)(sender.AttackDelay * 1000) + 1;
+                        m_lastWindUpTime = (int)(sender.AttackCastDelay * 1000);
+                        m_lastAttackCooldown = (int)(sender.AttackDelay * 1000);
                         m_lastAttackCompletesAt = m_lastAATick + m_lastWindUpTime;
                         m_lastAttackPos = ObjectManager.Player.ServerPosition.To2D();
                         m_attackInProgress = true;
                     }
                     if (m_baseAttackSpeed == 0.5f)
-                    {
-                        m_baseWindUp = 1f / (sender.AttackCastDelay * ObjectManager.Player.GetAttackSpeed());
-                        m_baseAttackSpeed = 1f / (sender.AttackDelay * ObjectManager.Player.GetAttackSpeed());
-                    }
+                        SetOrbwalkValues();
                 }
                 else if (Utility.IsAutoAttackReset(args.SData.Name))
                 {
@@ -728,16 +738,13 @@ namespace SCommon.Orbwalking
             {
                 Events.FireOnAttack(this, m_lastTarget);
                 m_lastAATick = Utils.TickCount - Game.Ping / 2;
-                m_lastWindUpTime = (int)(sender.AttackCastDelay * 1000) + 1;
-                m_lastAttackCooldown = (int)(sender.AttackDelay * 1000) + 1;
+                m_lastWindUpTime = (int)(sender.AttackCastDelay * 1000);
+                m_lastAttackCooldown = (int)(sender.AttackDelay * 1000);
                 m_lastAttackCompletesAt = m_lastAATick + m_lastWindUpTime;
                 m_lastAttackPos = ObjectManager.Player.ServerPosition.To2D();
                 m_attackInProgress = true;
                 if (m_baseAttackSpeed == 0.5f)
-                {
-                    m_baseWindUp = 1f / (sender.AttackCastDelay * ObjectManager.Player.GetAttackSpeed());
-                    m_baseAttackSpeed = 1f / (sender.AttackDelay * ObjectManager.Player.GetAttackSpeed());
-                }
+                    SetOrbwalkValues();
 
                 LeagueSharp.Common.Utility.DelayAction.Add((int)Math.Max(1, (args.Path.First().Distance(args.Path.Last()) / args.Speed * 1000)), () =>
                 {
@@ -781,10 +788,7 @@ namespace SCommon.Orbwalking
                 else if (buffname == "rengarqbase" || buffname == "rengarqemp")
                 {
                     if (m_baseAttackSpeed == 0.5f)
-                    {
-                        m_baseWindUp = 1f / (sender.AttackCastDelay * ObjectManager.Player.GetAttackSpeed());
-                        m_baseAttackSpeed = 1f / (sender.AttackDelay * ObjectManager.Player.GetAttackSpeed());
-                    }
+                        SetOrbwalkValues();
                 }
             }
         }
@@ -797,6 +801,12 @@ namespace SCommon.Orbwalking
                 if (buffname == "jaycestancegun" || buffname == "jaycestancehammer" || buffname == "swainmetamorphism" || buffname == "gnartransform" || buffname == "rengarqbase" || buffname == "rengarqemp")
                     ResetOrbwalkValues();
             }
+        }
+
+        private void Obj_AI_Base_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+            if(sender.IsMe && m_attackInProgress && (args.Animation == "Run" || args.Animation == "Idle"))
+                ResetAATimer();
         }
     }
 }

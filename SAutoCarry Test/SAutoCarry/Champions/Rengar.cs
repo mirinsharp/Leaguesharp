@@ -85,7 +85,7 @@ namespace SAutoCarry.Champions
                 var t = TargetSelector.GetTarget(Spells[E].Range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
                 if (t != null && t.IsValidTarget(Spells[E].Range) && Spells[E].IsReady())
                 {
-                    if (!t.IsValidTarget(SCommon.Orbwalking.Utility.GetRealAARange(t) * 3) && t.IsValidTarget(Spells[E].Range) && HaveFullFerocity)
+                    if (t.IsValidTarget(SCommon.Orbwalking.Utility.GetRealAARange(t) * 2) && HaveFullFerocity)
                         return;
                     Spells[E].SPredictionCast(t, HitChance.High);
                 }
@@ -169,7 +169,7 @@ namespace SAutoCarry.Champions
                     }
                 }
 
-                if (WillLeap)
+                if (ObjectManager.Player.HasBuff("RengarR"))
                     Orbwalker.Configuration.DontMoveInRange = true;
             }
         }
@@ -180,7 +180,7 @@ namespace SAutoCarry.Champions
             {
                 LeagueSharp.Common.Utility.DelayAction.Add(100, () =>
                 {
-                    if (ComboUseE && Spells[E].IsReady())
+                    if (ComboUseE && Spells[E].IsReady() && (!HaveFullFerocity || !OneShotComboActive || ObjectManager.Player.HasBuff("rengarqbase") || ObjectManager.Player.HasBuff("rengarqemp")))
                     {
                         var pred = Spells[E].GetSPrediction(args.Target as Obj_AI_Hero);
                         if (pred.HitChance > HitChance.Impossible)
@@ -194,6 +194,9 @@ namespace SAutoCarry.Champions
 
         protected override void Unit_OnDash(Obj_AI_Base sender, Dash.DashItem args)
         {
+            if (Orbwalker.Configuration.DontMoveInRange)
+                LeagueSharp.Common.Utility.DelayAction.Add(args.Duration + 100, () => Orbwalker.Configuration.DontMoveInRange = false);
+
             if (sender.IsMe && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo && leapTarget != null)
             {
                 LeagueSharp.Common.Utility.DelayAction.Add(Math.Max(1, args.Duration - 200), () =>
@@ -206,13 +209,6 @@ namespace SAutoCarry.Champions
 
                     Spells[W].Cast();
                 });
-                if (HaveFullFerocity)
-                {
-                    lastLeap = args.EndTick;
-                    LeagueSharp.Common.Utility.DelayAction.Add(args.Duration + 250, () => Orbwalker.Configuration.DontMoveInRange = false);
-                }
-                else
-                    LeagueSharp.Common.Utility.DelayAction.Add(args.Duration + 100, () => Orbwalker.Configuration.DontMoveInRange = false);
             }
         }
 

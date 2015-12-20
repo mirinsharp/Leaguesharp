@@ -132,7 +132,7 @@ namespace SCommon.Database
         /// <returns><c>true</c> if the unit is jungle minion</returns>
         public static bool IsJungleMinion(this Obj_AI_Base unit)
         {
-            return s_JungleMinionData.Any(p => p.Contains(unit.Name));
+            return s_JunglePrio.ContainsKey(unit.Name);
         }
 
         /// <summary>

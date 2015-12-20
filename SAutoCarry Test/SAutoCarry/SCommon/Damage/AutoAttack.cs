@@ -538,6 +538,11 @@ namespace SCommon.Damage
                 if (target.HealthPercent <= 15 && hero.Spellbook.GetSpell(SpellSlot.E).Level > 0)
                     dmg *= 2;
             }
+            else if(hero.ChampionName == "Lucian")
+            {
+                if (ObjectManager.Player.HasBuff("lucianpassivebuff"))
+                    dmg *= 2;
+            }
 
             if (passiveCheck)
             {

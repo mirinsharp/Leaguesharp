@@ -97,7 +97,7 @@ namespace SAutoCarry.Champions
             var t = TargetSelector.GetTarget(Spells[Q].Range, LeagueSharp.Common.TargetSelector.DamageType.Physical);
             if (t != null)
             {
-                if (Spells[Q].IsReady())
+                if (Spells[Q].IsReady() && ComboUseQ)
                     Spells[Q].CastOnUnit(t);
 
                 if (!CheckPassive && Spells[W].IsReady())
@@ -183,7 +183,7 @@ namespace SAutoCarry.Champions
             if (target.ServerPosition.To2D().Distance(vec) <= target.AttackRange && vec.CountEnemiesInRange(1000) > 1)
                 return Vector3.Zero;
 
-            if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.BasicAttack.CastRange) || vec.UnderTurret(true))
+            if (HeroManager.Enemies.Any(p => p.NetworkId != target.NetworkId && p.ServerPosition.To2D().Distance(vec) <= p.AttackRange) || vec.UnderTurret(true))
                 return Vector3.Zero;
 
             return vec;
@@ -195,6 +195,18 @@ namespace SAutoCarry.Champions
             {
                 if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E || args.Slot == SpellSlot.R)
                     HasPassive = true;
+            }
+        }
+
+        protected override void Orbwalking_BeforeAttack(SCommon.Orbwalking.BeforeAttackArgs args)
+        {
+            if (!HasPassive && args.Target != null && args.Target is Obj_AI_Hero && Orbwalker.ActiveMode == SCommon.Orbwalking.Orbwalker.Mode.Combo)
+            {
+                if (Spells[Q].IsReady() && ComboUseQ)
+                {
+                    Spells[Q].CastOnUnit(args.Target as Obj_AI_Base);
+                    args.Process = false;
+                }
             }
         }
 

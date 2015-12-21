@@ -76,7 +76,20 @@ namespace SCommon.Orbwalking
             Obj_AI_Base.OnBuffRemove += Obj_AI_Base_OnBuffRemove;
             Obj_AI_Base.OnNewPath += Obj_AI_Base_OnNewPath;
             Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
+            Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
             new Drawings(this);
+        }
+
+        void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
+        {
+            if(sender.IsMe && m_attackInProgress && ActiveMode != Mode.None)
+            {
+                if(args.Order == GameObjectOrder.AttackTo || args.Order == GameObjectOrder.AttackUnit || args.Order == GameObjectOrder.AutoAttack)
+                {
+                    if (args.Target != null && m_lastTarget != null && args.Target.NetworkId != m_lastTarget.NetworkId)
+                        args.Process = false;
+                }
+            }   
         }
 
         /// <summary>
@@ -184,7 +197,7 @@ namespace SCommon.Orbwalking
         {
             if (m_baseAttackSpeed == 0.5f)
             {
-                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
+                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown * 2;
                 m_lastAttackTick = 0;
                 m_attackReset = true;
                 m_attackInProgress = false;

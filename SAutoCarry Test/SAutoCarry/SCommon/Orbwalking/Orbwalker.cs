@@ -727,6 +727,7 @@ namespace SCommon.Orbwalking
                 }
                 else if (Utility.IsAutoAttackReset(args.SData.Name))
                 {
+                    if(args.SData.SpellCastTime == 0)
                     ResetAATimer();
                 }
                 else if (!Utility.IsAutoAttackReset(args.SData.Name))
@@ -783,6 +784,10 @@ namespace SCommon.Orbwalking
                     m_attackInProgress = false;
                     m_attackReset = false;
                     Events.FireAfterAttack(this, args.Target as AttackableUnit);
+                }
+                else if(Utility.IsAutoAttackReset(args.SData.Name))
+                {
+                    ResetAATimer();
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace SCommon.Orbwalking
             "dariusnoxiantacticsonh", "fioraflurry", "garenq",
             "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane", "lucianq", "lucianw", "gravesmove",
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
-            "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarq", "shyvanadoubleattack",
+            "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarqbase", "rengarqemp", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq", "masochism",
             "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "ricochet", "siphoningstrikenew", "garenslash3", "hecarimramp", "shyvanadoubleattackdragon"
         };

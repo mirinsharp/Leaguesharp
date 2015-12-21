@@ -20,7 +20,12 @@ namespace SAutoCarry.Champions.Helpers
             Menu condemn = new Menu("Condemn Settings", "SAutoCarry.Helpers.Condemn.Root");
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.AntiGapCloser", "Use Condemn to Gapclosers").SetValue(false));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.Interrupter", "Use Condemn to Interrupt spells").SetValue(false));
-            condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.TumbleCondemn", "Q->E when possible").SetValue(true));
+            condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.TumbleCondemn", "Q->E when possible").SetValue(true)).ValueChanged += 
+                (s, ar) =>
+                {
+                    condemn.Item("SAutoCarry.Helpers.Condemn.Root.TumbleCondemnSafe").Show(ar.GetNewValue<bool>());
+                };
+            condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.TumbleCondemnSafe", "Only Q->E when tumble position is safe").SetValue(false)).Show(condemn.Item("SAutoCarry.Helpers.Condemn.Root.TumbleCondemn").GetValue<bool>());
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.FlashCondemn", "Condemn->Flash selected target").SetValue(new KeyBind('T', KeyBindType.Press)));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.DontCondemnTurret", "Dont Condemn Under Turret").SetValue(true));
             condemn.AddItem(new MenuItem("SAutoCarry.Helpers.Condemn.Root.PushDistance", "Push Distance").SetValue(new Slider(400, 300, 470)));
@@ -120,10 +125,13 @@ namespace SAutoCarry.Champions.Helpers
                         float y = ObjectManager.Player.Position.Y + outRadius * (float)Math.Sin(angle);
                         targetPosition = Geometry.PositionAfter(target.GetWaypoints(), 300, (int)target.MoveSpeed);
                         var vec = new Vector2(x, y);
-                        if (targetPosition.Distance(vec) < 550f && IsCondemnable(vec, targetPosition, target.BoundingRadius, 300f) && Tumble.IsSafe(target, vec.To3D2(), false).IsValid())
+                        if (targetPosition.Distance(vec) < 550f && IsCondemnable(vec, targetPosition, target.BoundingRadius, 300f))
                         {
-                            s_Champion.Spells[Champion.Q].Cast(vec);
-                            return false;
+                            if (!TumbleCondemnSafe || Tumble.IsSafe(target, vec.To3D2(), false).IsValid())
+                            {
+                                s_Champion.Spells[Champion.Q].Cast(vec);
+                                break;
+                            }
                         }
                     }
 
@@ -224,6 +232,11 @@ namespace SAutoCarry.Champions.Helpers
         public static bool TumbleCondemn
         {
             get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.TumbleCondemn").GetValue<bool>(); }
+        }
+
+        public static bool TumbleCondemnSafe
+        {
+            get { return s_Champion.ConfigMenu.Item("SAutoCarry.Helpers.Condemn.Root.TumbleCondemnSafe").GetValue<bool>(); }
         }
 
         public static bool FlashCondemn

@@ -17,8 +17,6 @@ namespace SAutoCarry.Champions
         public Vayne()
             : base("Vayne", "SAutoCarry - Vayne")
         {
-            Tumble.Initialize(this);
-            Condemn.Initialize(this);
             SCommon.Prediction.Prediction.predMenu.Item("SPREDDRAWINGS").SetValue(false);
             OnDraw += BeforeDraw;
             OnCombo += Combo;
@@ -49,6 +47,9 @@ namespace SAutoCarry.Champions
             ConfigMenu.AddSubMenu(misc);
 
             ConfigMenu.AddToMainMenu();
+
+            Tumble.Initialize(this);
+            Condemn.Initialize(this);
         }
 
         public override void SetSpells()

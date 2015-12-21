@@ -14,6 +14,7 @@ namespace SAutoCarry.Champions
 {
     public class Lucian : Champion
     {
+        private bool m_spellCasting;
         public Lucian()
             : base("Lucian", "SAutoCarry - Lucian")
         {
@@ -23,6 +24,7 @@ namespace SAutoCarry.Champions
             OnHarass += Harass;
             OnLaneClear += LaneClear;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Spellbook.OnStopCast += Spellbook_OnStopCast;
             SCommon.Prediction.Prediction.predMenu.Item("SPREDDRAWINGS").SetValue(false);
         }
 
@@ -248,8 +250,22 @@ namespace SAutoCarry.Champions
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (IsUltActive && (args.Slot != SpellSlot.R && args.Slot != SpellSlot.E))
-                args.Process = false;
+
+            if (sender.Owner.IsMe && (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E || args.Slot == SpellSlot.R))
+            {
+                if (m_spellCasting)
+                    return;
+
+                m_spellCasting = true;
+                if (IsUltActive && (args.Slot != SpellSlot.R && args.Slot != SpellSlot.E))
+                    args.Process = false;
+            }
+        }
+
+        private void Spellbook_OnStopCast(Spellbook sender, SpellbookStopCastEventArgs args)
+        {
+            if (sender.Owner.IsMe)
+                m_spellCasting = false;
         }
 
         public bool IsUltActive

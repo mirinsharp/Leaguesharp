@@ -72,7 +72,6 @@ namespace SCommon.Orbwalking
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnDoCast += Obj_AI_Base_OnDoCast;
-            Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
             Obj_AI_Base.OnBuffAdd += Obj_AI_Base_OnBuffAdd;
             Obj_AI_Base.OnBuffRemove += Obj_AI_Base_OnBuffRemove;
             Obj_AI_Base.OnNewPath += Obj_AI_Base_OnNewPath;
@@ -199,7 +198,10 @@ namespace SCommon.Orbwalking
         {
             m_baseAttackSpeed = 0.5f;
         }
-
+        
+        /// <summary>
+        /// Sets orbwalk value
+        /// </summary>
         public void SetOrbwalkValues()
         {
             m_baseWindUp = 1f / (ObjectManager.Player.AttackCastDelay * ObjectManager.Player.GetAttackSpeed());
@@ -769,15 +771,6 @@ namespace SCommon.Orbwalking
                     m_attackReset = false;
                     Events.FireAfterAttack(this, args.Target as AttackableUnit);
                 }
-            }
-        }
-
-        private void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
-        {
-            if (sender.IsMe)
-            {
-                if (args.Order == GameObjectOrder.MoveTo || args.Order == GameObjectOrder.Stop)
-                    m_attackInProgress = false;
             }
         }
 

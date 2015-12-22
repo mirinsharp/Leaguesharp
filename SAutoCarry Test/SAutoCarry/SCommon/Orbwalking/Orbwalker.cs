@@ -412,7 +412,6 @@ namespace SCommon.Orbwalking
                 {
                     ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, pos);
                     m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 20);
-                    Game.PrintChat("{0}", Utils.TickCount - m_lastAATick);
                 }
             }
         }

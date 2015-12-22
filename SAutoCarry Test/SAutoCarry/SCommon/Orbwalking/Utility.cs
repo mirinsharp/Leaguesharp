@@ -16,7 +16,8 @@ namespace SCommon.Orbwalking
             "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
             "gangplankqwrapper", "poppydevastatingblow", "powerfist", "renektonpreexecute", "rengarqbase", "rengarqemp", "shyvanadoubleattack",
             "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble", "vie", "volibearq", "masochism",
-            "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "ricochet", "siphoningstrikenew", "garenslash3", "hecarimramp", "shyvanadoubleattackdragon"
+            "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "ricochet", "siphoningstrikenew", "garenslash3", "hecarimramp", "shyvanadoubleattackdragon",
+            "riventricleave", "itemtiamatcleave"
         };
 
         private static readonly string[] NoAttacks =
@@ -150,7 +151,7 @@ namespace SCommon.Orbwalking
 
         public static float GetScalingRange(this Obj_AI_Hero unit)
         {
-            return (unit.BBox.Minimum.Distance(unit.BBox.Maximum) - unit.GetOrginalHitBox()) / 2f;
+            return Math.Max(0, (unit.BBox.Minimum.Distance(unit.BBox.Maximum) - unit.GetOrginalHitBox())) / 2f;
         }
 
         public static bool IsNonCancelChamp(string name)

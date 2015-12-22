@@ -76,20 +76,8 @@ namespace SCommon.Orbwalking
             Obj_AI_Base.OnBuffRemove += Obj_AI_Base_OnBuffRemove;
             Obj_AI_Base.OnNewPath += Obj_AI_Base_OnNewPath;
             Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
-            Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
+            Spellbook.OnStopCast += Spellbook_OnStopCast;
             new Drawings(this);
-        }
-
-        void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
-        {
-            if(sender.IsMe && m_attackInProgress && ActiveMode != Mode.None)
-            {
-                if(args.Order == GameObjectOrder.AttackTo || args.Order == GameObjectOrder.AttackUnit || args.Order == GameObjectOrder.AutoAttack)
-                {
-                    if (args.Target != null && m_lastTarget != null && args.Target.NetworkId != m_lastTarget.NetworkId)
-                        args.Process = false;
-                }
-            }   
         }
 
         /// <summary>
@@ -195,9 +183,9 @@ namespace SCommon.Orbwalking
         /// </summary>
         public void ResetAATimer()
         {
-            if (m_baseAttackSpeed == 0.5f)
+            if (m_baseAttackSpeed != 0.5f)
             {
-                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown * 2;
+                m_lastAATick = Utils.TickCount - Game.Ping / 2 - m_lastAttackCooldown;
                 m_lastAttackTick = 0;
                 m_attackReset = true;
                 m_attackInProgress = false;
@@ -227,19 +215,19 @@ namespace SCommon.Orbwalking
         /// <returns>true if can attack</returns>
         public bool CanAttack(int t = 0)
         {
-            if (ObjectManager.Player.CharData.BaseSkinName == "Graves" && !ObjectManager.Player.HasBuff("GravesBasicAttackAmmo1") && !ObjectManager.Player.HasBuff("GravesBasicAttackAmmo2"))
-                return false;
-
             if (!m_Attack)
                 return false;
-
-            if (m_fnCanAttack != null)
-                return m_fnCanAttack();
 
             if (m_attackReset)
                 return true;
 
-            return Utils.TickCount + t + Game.Ping / 2 - m_lastAATick - m_Configuration.ExtraWindup - (m_Configuration.LegitMode && !ObjectManager.Player.IsMelee ? Math.Max(100, ObjectManager.Player.AttackDelay * 1000) : 0) * m_Configuration.LegitPercent / 100f >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
+            if (m_fnCanAttack != null)
+                return m_fnCanAttack();
+
+            if (ObjectManager.Player.CharData.BaseSkinName == "Graves" && !ObjectManager.Player.HasBuff("GravesBasicAttackAmmo1") && !ObjectManager.Player.HasBuff("GravesBasicAttackAmmo2"))
+                return false;
+
+            return Utils.TickCount + t + Game.Ping - m_lastAATick - m_Configuration.ExtraWindup - (m_Configuration.LegitMode && !ObjectManager.Player.IsMelee ? Math.Max(100, ObjectManager.Player.AttackDelay * 1000) : 0) * m_Configuration.LegitPercent / 100f >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseAttackSpeed);
         }
 
         /// <summary>
@@ -251,12 +239,15 @@ namespace SCommon.Orbwalking
             if (!m_Move)
                 return false;
 
+            if (Utils.TickCount - m_lastWindUpTime < (ObjectManager.Player.AttackDelay - ObjectManager.Player.AttackCastDelay) * 1000f + (Game.Ping <= 30 ? 30 : 0))
+                return true;
+            
             if (m_fnCanMove != null)
                 return m_fnCanMove();
 
             if (Utility.IsNonCancelChamp(ObjectManager.Player.CharData.BaseSkinName))
                 return Utils.TickCount - m_lastMoveTick >= 70 + m_rnd.Next(0, Game.Ping);
-
+            
             return Utils.TickCount + t - 20 - m_lastAATick - m_Configuration.ExtraWindup - m_Configuration.MovementDelay >= 1000 / (ObjectManager.Player.GetAttackSpeed() * m_baseWindUp);
         }
 
@@ -278,7 +269,7 @@ namespace SCommon.Orbwalking
                 if (target.Type == GameObjectType.obj_AI_Hero)
                 {
                     Obj_AI_Hero hero = target as Obj_AI_Hero;
-                    return ObjectManager.Player.Distance(hero.ServerPosition) - hero.BoundingRadius - hero.GetScalingRange() + 10 < Utility.GetAARange();
+                    return ObjectManager.Player.Distance(hero.ServerPosition) - hero.BoundingRadius - hero.GetScalingRange() + 10 < Utility.GetAARange() || Utility.InAARange(hero);
                 }
                 else
                     return (target.Type != GameObjectType.obj_AI_Turret || m_Configuration.AttackStructures) && ObjectManager.Player.Distance(target.Position) - target.BoundingRadius + 20 < Utility.GetAARange();
@@ -355,7 +346,7 @@ namespace SCommon.Orbwalking
                             Attack(target);
                         else
                         {
-                            if(CanMove() && ObjectManager.Player.GetAttackSpeed() < 2.51f)
+                            if(CanMove())
                             {
                                 if (m_Configuration.DontMoveInRange && target.Type == GameObjectType.obj_AI_Hero)
                                     return;
@@ -365,7 +356,7 @@ namespace SCommon.Orbwalking
                             }
                         }
                     }
-                    else if (CanMove() && ObjectManager.Player.GetAttackSpeed() < 2.51f)
+                    else if (CanMove())
                     {
                         if (m_Configuration.DontMoveInRange && target.Type == GameObjectType.obj_AI_Hero)
                             return;
@@ -393,36 +384,45 @@ namespace SCommon.Orbwalking
 
         private void Move(Vector3 pos)
         {
-            if (!m_attackInProgress && (!CanAttack(60) || CanAttack()))
+            if (!m_attackInProgress && CanMove() && (!CanAttack(60) || CanAttack()))
             {
-                if (!m_Configuration.DontMoveMouseOver || ObjectManager.Player.Distance(Game.CursorPos, true) > ObjectManager.Player.BoundingRadius * ObjectManager.Player.BoundingRadius * 4)
+                Vector3 playerPos = ObjectManager.Player.ServerPosition;
+
+                bool holdzone = m_Configuration.DontMoveMouseOver || m_Configuration.HoldAreaRadius != 0;
+                var holdzoneRadiusSqr = Math.Max(m_Configuration.HoldAreaRadius * m_Configuration.HoldAreaRadius, ObjectManager.Player.BoundingRadius * ObjectManager.Player.BoundingRadius * 4);
+                if (holdzone && playerPos.Distance(pos, true) < holdzoneRadiusSqr)
                 {
-                    Vector3 playerPos = ObjectManager.Player.ServerPosition;
-                    if (playerPos.Distance(pos, true) < m_Configuration.HoldAreaRadius * m_Configuration.HoldAreaRadius)
-                    {
+                    if ((Utils.TickCount + Game.Ping / 2 - m_lastAATick) * 0.6f >= 1000f / (ObjectManager.Player.GetAttackSpeed() * m_baseWindUp))
                         ObjectManager.Player.IssueOrder(GameObjectOrder.Stop, playerPos);
-                        m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 20);
-                        return;
-                    }
+                    m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 20);
+                    return;
+                }
 
-                    if (ObjectManager.Player.Distance(pos, true) < 22500)
-                        pos = playerPos.Extend(pos, (m_rnd.NextFloat(0.6f, 1.01f) + 0.2f) * 400);
+                /*expermential*/
+                var t = GetTarget();
+                if (ObjectManager.Player.IsMelee && CanOrbwalkTarget(t) && t.Type == GameObjectType.obj_AI_Hero && m_Configuration.MagnetMelee && ObjectManager.Player.Distance(t) - t.BoundingRadius < m_Configuration.StickRange)
+                    return;
+                /*expermential*/
+
+                if (ObjectManager.Player.Distance(pos, true) < 22500)
+                    pos = playerPos.Extend(pos, (m_rnd.NextFloat(0.6f, 1.01f) + 0.2f) * 400);
 
 
-                    if (m_lastMoveTick + 70 + Math.Min(60, Game.Ping) < Utils.TickCount)
-                    {
-                        ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, pos);
-                        m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 20);
-                    }
+                if (m_lastMoveTick + 150 + Math.Min(60, Game.Ping) < Utils.TickCount)
+                {
+                    ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, pos);
+                    m_lastMoveTick = Utils.TickCount + m_rnd.Next(1, 20);
+                    Game.PrintChat("{0}", Utils.TickCount - m_lastAATick);
                 }
             }
         }
+        
 
         private void Attack(AttackableUnit target)
         {
             if (m_lastAttackTick < Utils.TickCount && !m_attackInProgress)
             {
-                m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 50);
+                m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 20);
                 m_lastAATick = Utils.TickCount + Game.Ping / 2;
                 m_attackInProgress = true;
                 ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, target);
@@ -437,7 +437,9 @@ namespace SCommon.Orbwalking
                 {
                     if (!CanOrbwalkTarget(target) && target.IsValidTarget(m_Configuration.StickRange))
                     {
-                        OrbwalkingPoint = target.Position;
+                        /*expermential*/
+                        OrbwalkingPoint = target.Position.Extend(ObjectManager.Player.ServerPosition, -(m_rnd.NextFloat(0.6f, 1.01f) + 0.2f) * 400);
+                        /*expermential*/
                     }
                     else
                         OrbwalkingPoint = Vector3.Zero;
@@ -454,7 +456,7 @@ namespace SCommon.Orbwalking
             Obj_AI_Base unkillableMinion = null;
             foreach (var minion in MinionManager.GetMinions(ObjectManager.Player.AttackRange + 100f).OrderByDescending(p => ObjectManager.Player.GetAutoAttackDamage(p)))
             {
-                float t = GetAnimationTime() + minion.Distance(ObjectManager.Player.ServerPosition) / Utility.GetProjectileSpeed() /*- 0.07f*/;
+                float t = GetAnimationTime() + minion.Distance(ObjectManager.Player.ServerPosition) / Utility.GetProjectileSpeed();
                 if (CanOrbwalkTarget(minion))
                 {
                     if (minion.Health - Damage.Prediction.GetPrediction(minion, t * 1000f) > 2 * Damage.AutoAttack.GetDamage(minion, true) || Damage.Prediction.IsLastHitable(minion))
@@ -727,7 +729,6 @@ namespace SCommon.Orbwalking
                 }
                 else if (Utility.IsAutoAttackReset(args.SData.Name))
                 {
-                    if(args.SData.SpellCastTime == 0)
                     ResetAATimer();
                 }
                 else if (!Utility.IsAutoAttackReset(args.SData.Name))
@@ -783,11 +784,8 @@ namespace SCommon.Orbwalking
                     m_lastWindUpTick = Utils.TickCount;
                     m_attackInProgress = false;
                     m_attackReset = false;
+                    m_lastMoveTick = 0;
                     Events.FireAfterAttack(this, args.Target as AttackableUnit);
-                }
-                else if(Utility.IsAutoAttackReset(args.SData.Name))
-                {
-                    ResetAATimer();
                 }
             }
         }
@@ -819,7 +817,16 @@ namespace SCommon.Orbwalking
 
         private void Obj_AI_Base_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
         {
-            if(sender.IsMe && m_attackInProgress && (args.Animation == "Run" || args.Animation == "Idle"))
+            //if (sender.IsMe && m_attackInProgress && (args.Animation == "Run" || args.Animation == "Idle"))
+            //{
+            //    Game.PrintChat(args.Animation);
+            //    ResetAATimer();
+            //}
+        }
+
+        private void Spellbook_OnStopCast(Spellbook sender, SpellbookStopCastEventArgs args)
+        {
+            if (sender.Owner.IsValid && sender.Owner.IsMe && args.DestroyMissile && args.StopAnimation)
                 ResetAATimer();
         }
     }

@@ -23,7 +23,7 @@ namespace SCommon.Orbwalking
 
         private Random m_rnd;
         private int m_lastAATick;
-        private int m_lastWindUpTick;
+        private int m_lastWindUpEndTick;
         private int m_lastWindUpTime;
         private int m_lastAttackCooldown;
         private int m_lastAttackCompletesAt;
@@ -53,7 +53,7 @@ namespace SCommon.Orbwalking
         {
             m_rnd = new Random();
             m_lastAATick = 0;
-            m_lastWindUpTick = 0;
+            m_lastWindUpEndTick = 0;
             m_lastMoveTick = 0;
             m_Attack = true;
             m_Move = true;
@@ -114,9 +114,9 @@ namespace SCommon.Orbwalking
         /// <summary>
         /// Gets Last WindUp tick
         /// </summary>
-        public int LastWindUpTick
+        public int LastWindUpEndTick
         {
-            get { return m_lastWindUpTick; }
+            get { return m_lastWindUpEndTick; }
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace SCommon.Orbwalking
             if (!m_Move)
                 return false;
 
-            if (Utils.TickCount - m_lastWindUpTick < (ObjectManager.Player.AttackDelay - ObjectManager.Player.AttackCastDelay) * 1000f + (Game.Ping <= 30 ? 30 : 0))
+            if (Utils.TickCount - m_lastWindUpEndTick < (ObjectManager.Player.AttackDelay - ObjectManager.Player.AttackCastDelay) * 1000f + (Game.Ping <= 30 ? 30 : 0))
                 return true;
             
             if (m_fnCanMove != null)
@@ -421,6 +421,7 @@ namespace SCommon.Orbwalking
         {
             if (m_lastAttackTick < Utils.TickCount && !m_attackInProgress)
             {
+                m_lastWindUpEndTick = 0;
                 m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 20);
                 m_lastAATick = Utils.TickCount + Game.Ping;
                 m_attackInProgress = true;
@@ -530,14 +531,15 @@ namespace SCommon.Orbwalking
             if (m_towerTarget != null && m_towerTarget.IsValidTarget() && CanOrbwalkTarget(m_towerTarget) && !m_towerTarget.IsSiegeMinion())
                 return true;
 
-            if (ObjectManager.Get<Obj_AI_Turret>().Any(p => p.IsValidTarget(950, false, ObjectManager.Player.ServerPosition) && p.IsAlly))
+            var underTurret = ObjectManager.Get<Obj_AI_Turret>().FirstOrDefault(p => p.IsValidTarget(950, false, ObjectManager.Player.ServerPosition) && p.IsAlly);
+
+            if (underTurret != null)
             {
                 return ObjectManager.Get<Obj_AI_Minion>()
                     .Any(
-                        minion => minion.IsValidTarget(950) && minion.Team != GameObjectTeam.Neutral &&
+                        minion => minion.IsValidTarget(950 * 2f) && minion.Team != GameObjectTeam.Neutral &&
                                   MinionManager.IsMinion(minion, false) && !minion.IsSiegeMinion() &&
-                                  ObjectManager.Get<Obj_AI_Turret>().Any(p => p.IsValidTarget(950, false, minion.ServerPosition) && p.IsAlly) &&
-                                  (minion.Health - Damage.Prediction.GetPrediction(minion, GetAnimationTime() * 1000f * 2f + GetWindupTime() * 1000f, true) <= Damage.AutoAttack.GetDamage(minion, true) * (int)(Math.Ceiling(Damage.Prediction.AggroCount(minion) / 2f))));
+                                  underTurret.IsValidTarget(950f, false, minion.ServerPosition));
                 
             }
 
@@ -767,7 +769,7 @@ namespace SCommon.Orbwalking
 
                 LeagueSharp.Common.Utility.DelayAction.Add((int)Math.Max(1, (args.Path.First().Distance(args.Path.Last()) / args.Speed * 1000)), () =>
                 {
-                    m_lastWindUpTick = Utils.TickCount;
+                    m_lastWindUpEndTick = Utils.TickCount;
                     m_attackInProgress = false;
                     Events.FireAfterAttack(this, m_lastTarget);
                 });
@@ -780,7 +782,7 @@ namespace SCommon.Orbwalking
             {
                 if (Utility.IsAutoAttack(args.SData.Name))
                 {
-                    m_lastWindUpTick = Utils.TickCount;
+                    m_lastWindUpEndTick = Utils.TickCount;
                     m_attackInProgress = false;
                     m_attackReset = false;
                     m_lastMoveTick = 0;

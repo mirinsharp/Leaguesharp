@@ -239,7 +239,7 @@ namespace SCommon.Orbwalking
             if (!m_Move)
                 return false;
 
-            if (Utils.TickCount - m_lastWindUpTime < (ObjectManager.Player.AttackDelay - ObjectManager.Player.AttackCastDelay) * 1000f + (Game.Ping <= 30 ? 30 : 0))
+            if (Utils.TickCount - m_lastWindUpTick < (ObjectManager.Player.AttackDelay - ObjectManager.Player.AttackCastDelay) * 1000f + (Game.Ping <= 30 ? 30 : 0))
                 return true;
             
             if (m_fnCanMove != null)
@@ -269,7 +269,7 @@ namespace SCommon.Orbwalking
                 if (target.Type == GameObjectType.obj_AI_Hero)
                 {
                     Obj_AI_Hero hero = target as Obj_AI_Hero;
-                    return ObjectManager.Player.Distance(hero.ServerPosition) - hero.BoundingRadius - hero.GetScalingRange() + 10 < Utility.GetAARange() || Utility.InAARange(hero);
+                    return ObjectManager.Player.Distance(hero.ServerPosition) - hero.BoundingRadius - hero.GetScalingRange() + 20 < Utility.GetAARange() || Utility.InAARange(hero);
                 }
                 else
                     return (target.Type != GameObjectType.obj_AI_Turret || m_Configuration.AttackStructures) && ObjectManager.Player.Distance(target.Position) - target.BoundingRadius + 20 < Utility.GetAARange();
@@ -422,7 +422,7 @@ namespace SCommon.Orbwalking
             if (m_lastAttackTick < Utils.TickCount && !m_attackInProgress)
             {
                 m_lastAttackTick = Utils.TickCount + m_rnd.Next(1, 20);
-                m_lastAATick = Utils.TickCount + Game.Ping / 2;
+                m_lastAATick = Utils.TickCount + Game.Ping;
                 m_attackInProgress = true;
                 ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, target);
             }

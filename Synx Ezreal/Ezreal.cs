@@ -68,16 +68,16 @@ namespace SynxEzreal
 
         public override void SetSpells()
         {
-            Spells[Q] = new Spell(SpellSlot.Q, 1190);
+            Spells[Q] = new Spell(SpellSlot.Q, 1150);
             Spells[Q].SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
 
-            Spells[W] = new Spell(SpellSlot.W, 800f);
+            Spells[W] = new Spell(SpellSlot.W, 950);
             Spells[W].SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
 
-            Spells[E] = new Spell(SpellSlot.E, 475f);
+            Spells[E] = new Spell(SpellSlot.E, 475);
 
             Spells[R] = new Spell(SpellSlot.R, 3000f);
-            Spells[R].SetSkillshot(1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
+            Spells[R].SetSkillshot(1.1f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
             m_evader.SetEvadeSpell(Spells[E]);
         }

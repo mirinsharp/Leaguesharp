@@ -19,9 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -64,7 +62,7 @@ namespace SPrediction
         public static float AvgMovChangeTime(this Obj_AI_Hero t)
         {
             Prediction.AssertInitializationMode();
-            return PathTracker.EnemyInfo[t.NetworkId].AvgTick + Prediction.IgnoreReactionDelay;
+            return PathTracker.EnemyInfo[t.NetworkId].AvgTick + ConfigMenu.IgnoreReactionDelay;
         }
 
         /// <summary>
@@ -77,6 +75,18 @@ namespace SPrediction
         {
             Prediction.AssertInitializationMode();
             return PathTracker.EnemyInfo[t.NetworkId].AvgPathLenght;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t">target</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float LastAngleDiff(this Obj_AI_Hero t)
+        {
+            Prediction.AssertInitializationMode();
+            return PathTracker.EnemyInfo[t.NetworkId].LastAngleDiff;
         }
     }
 }

@@ -58,19 +58,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>..\LeagueSharp222\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>..\LeagueSharp222\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\LeagueSharp222\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\LeagueSharp222\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\LeagueSharp222\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\User\Desktop\LeagueSharp222\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -98,6 +98,8 @@
     <Compile Include="ShineCommon\SPrediction\ClipperWrapper.cs" />
     <Compile Include="ShineCommon\SPrediction\Collision.cs" />
     <Compile Include="ShineCommon\SPrediction\ConePrediction.cs" />
+    <Compile Include="ShineCommon\SPrediction\ConfigMenu.cs" />
+    <Compile Include="ShineCommon\SPrediction\Drawings.cs" />
     <Compile Include="ShineCommon\SPrediction\Geometry.cs" />
     <Compile Include="ShineCommon\SPrediction\LinePrediction.cs" />
     <Compile Include="ShineCommon\SPrediction\Obj_AI_HeroExtensions.cs" />
@@ -105,6 +107,7 @@
     <Compile Include="ShineCommon\SPrediction\Prediction.cs" />
     <Compile Include="ShineCommon\SPrediction\RingPrediction.cs" />
     <Compile Include="ShineCommon\SPrediction\SpellExtensions.cs" />
+    <Compile Include="ShineCommon\SPrediction\StasisPrediction.cs" />
     <Compile Include="ShineCommon\SPrediction\Utility.cs" />
     <Compile Include="ShineCommon\SPrediction\VectorPrediction.cs" />
     <Compile Include="ShineCommon\Utility.cs" />
@@ -112,6 +115,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

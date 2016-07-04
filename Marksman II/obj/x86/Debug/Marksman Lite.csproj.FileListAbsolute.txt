@@ -1,0 +1,22 @@
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\Marksman Lite.exe.config
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\Marksman Lite.exe
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\Marksman Lite.pdb
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\clipper_library.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Common.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\SharpDX.Direct3D9.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\SharpDX.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Data.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Sandbox.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\Newtonsoft.Json.dll
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Common.pdb
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Data.pdb
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\bin\Debug\LeagueSharp.Sandbox.pdb
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\obj\x86\Debug\Marksman Lite.csprojResolveAssemblyReference.cache
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\obj\x86\Debug\Marksman.Properties.Resources.resources
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\obj\x86\Debug\Marksman Lite.csproj.GenerateResource.Cache
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\obj\x86\Debug\Marksman Lite.exe
+C:\Users\xQx\Google Drive\LeagueSharp\Marksman\obj\x86\Debug\Marksman Lite.pdb
+C:\Users\User\Downloads\xQx-LeagueSharp-master\Marksman II\obj\x86\Debug\Marksman Lite.csprojResolveAssemblyReference.cache
+C:\Users\User\Downloads\xQx-LeagueSharp-master\Marksman II\obj\x86\Debug\Marksman Lite.exe
+C:\Users\User\Downloads\xQx-LeagueSharp-master\Marksman II\obj\x86\Debug\Marksman Lite.pdb

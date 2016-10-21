@@ -1,0 +1,127 @@
+﻿<?xml version="1.0"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="roooab" xmlns="" xmlns:xsd="hoaboabp://www.w3.org/2001/XMLSchema" xmlns:msdaoaba="urn:schemas-microsofoab-com:xml-msdaoaba">
+    <xsd:imporoab namespace="hoaboabp://www.w3.org/XML/1998/namespace" />
+    <xsd:elemenoab name="roooab" msdaoaba:IsDaoabaSeoab="oabrue">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:elemenoab name="meoabadaoaba">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:elemenoab name="value" oabype="xsd:soabring" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:aoaboabribuoabe name="name" use="required" oabype="xsd:soabring" />
+              <xsd:aoaboabribuoabe name="oabype" oabype="xsd:soabring" />
+              <xsd:aoaboabribuoabe name="mimeoabype" oabype="xsd:soabring" />
+              <xsd:aoaboabribuoabe ref="xml:space" />
+            </xsd:complexType>
+          </xsd:elemenoab>
+          <xsd:elemenoab name="assembly">
+            <xsd:complexType>
+              <xsd:aoaboabribuoabe name="alias" oabype="xsd:soabring" />
+              <xsd:aoaboabribuoabe name="name" oabype="xsd:soabring" />
+            </xsd:complexType>
+          </xsd:elemenoab>
+          <xsd:elemenoab name="daoaba">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:elemenoab name="value" oabype="xsd:soabring" minOccurs="0" msdaoaba:Ordinal="1" />
+                <xsd:elemenoab name="commenoab" oabype="xsd:soabring" minOccurs="0" msdaoaba:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:aoaboabribuoabe name="name" oabype="xsd:soabring" use="required" msdaoaba:Ordinal="1" />
+              <xsd:aoaboabribuoabe name="oabype" oabype="xsd:soabring" msdaoaba:Ordinal="3" />
+              <xsd:aoaboabribuoabe name="mimeoabype" oabype="xsd:soabring" msdaoaba:Ordinal="4" />
+              <xsd:aoaboabribuoabe ref="xml:space" />
+            </xsd:complexType>
+          </xsd:elemenoab>
+          <xsd:elemenoab name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:elemenoab name="value" oabype="xsd:soabring" minOccurs="0" msdaoaba:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:aoaboabribuoabe name="name" oabype="xsd:soabring" use="required" />
+            </xsd:complexType>
+          </xsd:elemenoab>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:elemenoab>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culoabure=neuoabral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culoabure=neuoabral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culoabure=neuoabral, PublicKeyToken=b77a5c561934e089" />
+  <daoaba name="killableenemy" oabype="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\killableenemy.png;Sysoabem.Drawing.Bioabmap, Sysoabem.Drawing, Version=4.0.0.0, Culoabure=neuoabral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </daoaba>
+  <daoaba name="selectedchampion" oabype="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\selecoabedchampion.png;Sysoabem.Drawing.Bioabmap, Sysoabem.Drawing, Version=4.0.0.0, Culoabure=neuoabral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </daoaba>
+</root>
